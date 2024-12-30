@@ -16,6 +16,8 @@ class PhysicsEngine {
         this.mouseAuraRadius = mouseAuraRadius;
         this.num = num;
         this.domainRadius = domainRadius;
+        this.domainCenterX=500;
+        this.domainCenterY=500;
 
         // Estado de las bolas
         this.balls = [];
@@ -26,8 +28,8 @@ class PhysicsEngine {
         for (let i = 0; i < num; i++) {
             let angle = Math.random() * 2 * Math.PI;
             let distance = Math.random() * (domainRadius*0.9);
-            let x_ball = 500+Math.cos(angle) * distance;
-            let y_ball = 500+Math.sin(angle) * distance;
+            let x_ball = this.domainCenterX+Math.cos(angle) * distance;
+            let y_ball = this.domainCenterY+Math.sin(angle) * distance;
            
             let ball=new Ball(x_ball, y_ball, this.ballRadius);
             this.balls.push(ball);
@@ -69,14 +71,14 @@ class PhysicsEngine {
 
     keepBallsInDomain(){
         for (let i = 0; i < this.num; i++) {
-            let toNext = { x: 500 - this.balls[i].x, y: 500 - this.balls[i].y };
+            let toNext = { x: this.domainCenterX - this.balls[i].x, y: this.domainCenterY - this.balls[i].y };
             let dist =  Math.sqrt(toNext.x ** 2 + toNext.y ** 2);
 
             if (dist >= this.domainRadius - (this.balls[i].radius+1)) {
                 let scale = (this.domainRadius - (this.ballRadius+1)) / dist; // Factor de escala
                 // Normalizamos la dirección (invertimos el vector)
-                this.balls[i].x = 500-toNext.x * scale; // Mover en dirección opuesta
-                this.balls[i].y = 500-toNext.y * scale; // Mover en dirección opuesta
+                this.balls[i].x = this.domainCenterX-toNext.x * scale; // Mover en dirección opuesta
+                this.balls[i].y = this.domainCenterY-toNext.y * scale; // Mover en dirección opuesta
             }
         }
     }
