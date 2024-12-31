@@ -79,7 +79,7 @@ class PhysicsEngine {
             // Separar bolas entre sí
             this.avoidOtherBalls();
             // Mantener las bolas dentro del dominio
-            this.keepBallsInDomain();
+            //this.keepBallsInDomain();
         }
     }
 
@@ -88,13 +88,34 @@ class PhysicsEngine {
             let toNext = { x: this.domainCenterX - this.balls[i].x, y: this.domainCenterY - this.balls[i].y };
             let dist = Math.sqrt(toNext.x ** 2 + toNext.y ** 2);
 
-            if (dist >= this.domainRadius - (this.balls[i].radius + 1)) {
-                let scale = (this.domainRadius - (this.ballRadius+1)) / dist; // Factor de escala
+            if (dist >= this.domainRadius - (this.balls[i].radius)) {
+                let scale = (this.domainRadius - (this.ballRadius)) / dist; // Factor de escala
                 // Normalizamos la dirección (invertimos el vector)
                 this.balls[i].x = this.domainCenterX-toNext.x * scale; // Mover en dirección opuesta
                 this.balls[i].y = this.domainCenterY-toNext.y * scale; // Mover en dirección opuesta
             }
         }
+    }
+
+    resolveCollision(ballIndex, obstacle) {
+        let dx = obstacle.x - this.balls[ballIndex].x;
+        let dy = obstacle.y - this.balls[ballIndex].y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = (this.balls[ballIndex].radius)+1;  // Distancia mínima deseada entre la pelota y el punto de intersección
+
+            // Calcular el vector de corrección (normalizado)
+            let overlap = minDist - dist;  // Qué tan lejos están de la distancia mínima
+            let scale = overlap / dist;  // Proporción del movimiento necesario
+
+            // Mover la pelota para evitar el cruce
+            let moveX = dx * scale;
+            let moveY = dy * scale;
+
+            // Ajustar la posición de la pelota
+            this.balls[ballIndex].x -= moveX / 2;
+            this.balls[ballIndex].y -= moveY / 2;
+
+
     }
 
     avoidOtherBalls() {

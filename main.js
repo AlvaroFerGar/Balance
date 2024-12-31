@@ -55,11 +55,45 @@ window.onload = function() {
 
         // Actualizar la posición de las bolas en el canvas
         for (let i = 0; i < num; i++) {
-            paperBalls[i].position.x = physicsEngine.getBalls()[i].x;
-            paperBalls[i].position.y = physicsEngine.getBalls()[i].y;
-        }
+            if (domain.contains(physicsEngine.getBalls()[i]))
+                {
+                    paperBalls[i].position.x = physicsEngine.getBalls()[i].x;
+                    paperBalls[i].position.y = physicsEngine.getBalls()[i].y;
+                }
+                else
+                {
+                    paperBalls[i].position.x = physicsEngine.getBalls()[i].prev_x;
+                    paperBalls[i].position.y = physicsEngine.getBalls()[i].prev_y;
+                    physicsEngine.getBalls()[i].x=physicsEngine.balls[i].prev_x;
+                    physicsEngine.getBalls()[i].y=physicsEngine.balls[i].prev_y;
+                }
+        }     
+
+        for (let i = 0; i < num; i++) {
+            let dist=paperBalls[i].position.getDistance(domain.getNearestPoint(paperBalls[i].position));
+            if(dist<physicsEngine.getBalls()[i].radius)
+            {
+                physicsEngine.resolveCollision(i,domain.getNearestPoint(paperBalls[i].position));
+            }
+        } 
+
+        for (let i = 0; i < num; i++) {
+            if (domain.contains(physicsEngine.getBalls()[i]))
+                {
+                    paperBalls[i].position.x = physicsEngine.getBalls()[i].x;
+                    paperBalls[i].position.y = physicsEngine.getBalls()[i].y;
+                }
+                else
+                {
+                    paperBalls[i].position.x = physicsEngine.getBalls()[i].prev_x;
+                    paperBalls[i].position.y = physicsEngine.getBalls()[i].prev_y;
+                    physicsEngine.getBalls()[i].x=physicsEngine.balls[i].prev_x;
+                    physicsEngine.getBalls()[i].y=physicsEngine.balls[i].prev_y;
+                }
+        }   
     };
 };
+
 
 function onWindowResize(canvas, domain, physicsEngine) {
     console.log("resize");
