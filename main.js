@@ -54,39 +54,41 @@ window.onload = function() {
 
     let text_size=48;
     let text_y=text_size;
-    let text_x_leftmargin=text_size;
-    let text_x_rightmargin=text_size;
+    let percentmargin=0.1;
 
     // Create counter texts
     const leftText = new paper.PointText({
-        point: [text_x_leftmargin, text_y],
+        point: [percentmargin*window.innerWidth, text_y],
         content: '0',
         fillColor: 'black',
-        fontSize: text_size
+        fontSize: text_size,
+        justification: 'left'
     });
 
     const rightText = new paper.PointText({
-        point: [window.innerWidth - text_x_rightmargin, text_y],
+        point: [(1-percentmargin)*window.innerWidth, text_y],
         content: '0',
         fillColor: 'black',
-        fontSize: text_size
+        fontSize: text_size,
+        justification: 'right'
     });
     centerLine.firstSegment.point = new paper.Point(centerX, 0);
     centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
-    rightText.position.x = window.innerWidth - text_x_rightmargin;
 
     const ballCounter = new BallCounter(leftText, rightText);
 
 
     // Manejar el redimensionamiento de la ventana
     window.onresize = function() {
+        console.log("resize");
         // Actualizar tamaño del canvas
         onWindowResize(canvas, domain, physicsEngine);
         // Update centerLine position
         const centerX = window.innerWidth / 2;
         centerLine.firstSegment.point = new paper.Point(centerX, 0);
         centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
-        rightText.position.x = window.innerWidth - text_x_rightmargin;
+        //rightText.position.x = window.innerWidth*(1-percentmargin);
+        //leftText.position.x = window.innerWidth*percentmargin;
     };
 
     // Guardar la posición del mouse
@@ -104,11 +106,13 @@ window.onload = function() {
         physicsEngine.update(mousePos, event.delta);
         domainEngine.handleCollisions(paperBalls);
         ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
+        
+        rightText.position.x = window.innerWidth*(1-percentmargin);
+        leftText.position.x = window.innerWidth*percentmargin;
     };
 };
 
 function onWindowResize(canvas, domain, physicsEngine, centerLine, rightText) {
-    console.log("resize");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
