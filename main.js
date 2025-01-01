@@ -99,6 +99,48 @@ window.onload = function() {
 
     onWindowResize(canvas, domain, physicsEngine);
 
+    let rotationDegree = 0;
+
+    function updateKnob() {
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const angle = (rotationDegree - 90) * (Math.PI / 180);
+        const radius = rect.width / 2 - 10;
+
+        const x = Math.cos(angle) * radius + rect.width / 2;
+        const y = Math.sin(angle) * radius + rect.height / 2;
+
+        innerCircle.style.left = x + 'px';
+        innerCircle.style.top = y + 'px';
+        
+        let value=rotationDegree;
+        if (rotationDegree < 0){
+            value = 360 + rotationDegree;
+        }
+        valueDisplay.textContent = value;
+    }
+
+    container.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        rotationDegree += e.deltaY > 0 ? 1 : -1;
+        updateKnob();
+    });
+
+    container.addEventListener('mouseenter', () => {
+        console.log("enter");
+        scrollMsg.style.visibility = 'visible';
+        scrollMsg.style.opacity = '1';
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        console.log("leave");
+        scrollMsg.style.visibility = 'hidden';
+        scrollMsg.style.opacity = '0';
+    });
+
+    // Initial position
+    updateKnob();
 
     // Función de animación
     paper.view.onFrame = function (event) {
@@ -114,11 +156,11 @@ window.onload = function() {
 };
 
 let oldRotationDegree = 0;
-let rotationDegree = 0;
 
 const innerCircle = document.querySelector('.inner-circle');
 const valueDisplay = document.querySelector('.value');
 const container = document.querySelector('.knob-container');
+const scrollMsg = document.querySelector('.scroll_msg');
 let isDragging = false;
 
 const rect = container.getBoundingClientRect();
@@ -131,42 +173,6 @@ const y = Math.sin(angle) * radius + rect.height / 2;
 
 innerCircle.style.left = x + 'px';
 innerCircle.style.top = y + 'px';
-
-function updateKnob(e) {
-    if (!isDragging) return;
-
-    const rect = container.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-
-    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-    const degrees = angle * (180 / Math.PI);
-    const radius = rect.width / 2-10;
-
-    const x = Math.cos(angle) * radius + rect.width / 2;
-    const y = Math.sin(angle) * radius + rect.height / 2;
-
-    innerCircle.style.left = x + 'px';
-    innerCircle.style.top = y + 'px';
-
-    rotationDegree = degrees + 90;
-    value=rotationDegree;
-    if(value<0)
-        value+=360;
-    valueDisplay.textContent = (value).toFixed(3);
-}
-
-innerCircle.addEventListener('mousedown', () => {
-    isDragging = true;
-});
-
-document.addEventListener('mousemove', updateKnob);
-document.addEventListener('mouseup', () => {
-    isDragging = false;
-});
-
-
-
 
 function onWindowResize(canvas, domain, physicsEngine, centerLine, rightText) {
     canvas.width = window.innerWidth;
