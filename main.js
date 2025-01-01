@@ -52,13 +52,13 @@ window.onload = function() {
         strokeWidth: 1
     });
 
-    let text_size=48;
-    let text_y=text_size;
-    let percentmargin=0.1;
+    let text_size = 48;
+    let text_y = text_size;
+    let percentmargin = 0.1;
 
     // Create counter texts
     const leftText = new paper.PointText({
-        point: [percentmargin*window.innerWidth, text_y],
+        point: [percentmargin * window.innerWidth, text_y],
         content: '0',
         fillColor: 'black',
         fontSize: text_size,
@@ -66,7 +66,7 @@ window.onload = function() {
     });
 
     const rightText = new paper.PointText({
-        point: [(1-percentmargin)*window.innerWidth, text_y],
+        point: [(1 - percentmargin) * window.innerWidth, text_y],
         content: '0',
         fillColor: 'black',
         fontSize: text_size,
@@ -93,7 +93,7 @@ window.onload = function() {
 
     // Guardar la posición del mouse
     let mousePos = { x: 0, y: 0 };
-    paper.view.onMouseMove = function(event) {
+    paper.view.onMouseMove = function (event) {
         mousePos = event.point;
     };
 
@@ -102,16 +102,14 @@ window.onload = function() {
 
     // Función de animación
     paper.view.onFrame = function (event) {
-        console.log(rotationDegree)
-
-        domain.rotate(rotationDegree-oldRotationDegree, domain.bounds.center);
-        oldRotationDegree=rotationDegree;
+        domain.rotate(rotationDegree - oldRotationDegree, domain.bounds.center);
+        oldRotationDegree = rotationDegree;
         physicsEngine.update(mousePos, event.delta);
         domainEngine.handleCollisions(paperBalls);
         ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
-        
-        rightText.position.x = window.innerWidth*(1-percentmargin);
-        leftText.position.x = window.innerWidth*percentmargin;
+
+        rightText.position.x = window.innerWidth * (1 - percentmargin);
+        leftText.position.x = window.innerWidth * percentmargin;
     };
 };
 
@@ -123,25 +121,39 @@ const valueDisplay = document.querySelector('.value');
 const container = document.querySelector('.knob-container');
 let isDragging = false;
 
+const rect = container.getBoundingClientRect();
+const angle = 0-Math.PI/2;
+const degrees = 0;
+const radius = rect.width / 2-10;
+
+const x = Math.cos(angle) * radius + rect.width / 2;
+const y = Math.sin(angle) * radius + rect.height / 2;
+
+innerCircle.style.left = x + 'px';
+innerCircle.style.top = y + 'px';
+
 function updateKnob(e) {
     if (!isDragging) return;
-    
+
     const rect = container.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    
+
     const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
     const degrees = angle * (180 / Math.PI);
-    const radius = rect.width / 2 - 20;
-    
+    const radius = rect.width / 2-10;
+
     const x = Math.cos(angle) * radius + rect.width / 2;
     const y = Math.sin(angle) * radius + rect.height / 2;
-    
+
     innerCircle.style.left = x + 'px';
     innerCircle.style.top = y + 'px';
 
-    rotationDegree=degrees+90;
-    valueDisplay.textContent = degrees+90;
+    rotationDegree = degrees + 90;
+    value=rotationDegree;
+    if(value<0)
+        value+=360;
+    valueDisplay.textContent = (value).toFixed(3);
 }
 
 innerCircle.addEventListener('mousedown', () => {
@@ -153,9 +165,7 @@ document.addEventListener('mouseup', () => {
     isDragging = false;
 });
 
-// Initial position
-innerCircle.style.left = container.offsetWidth / 2 + 'px';
-innerCircle.style.top = '20px';
+
 
 
 function onWindowResize(canvas, domain, physicsEngine, centerLine, rightText) {
