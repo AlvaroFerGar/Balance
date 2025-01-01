@@ -11,23 +11,30 @@ window.onload = function() {
     // Parámetros de la simulación
     const mouseAuraRadius = 50;
     const domainRadius = 300;
-    const num = 30;
+    const numberOfBalls = 30;
 
     // Crear el motor de física
-    const physicsEngine = new PhysicsEngine(mouseAuraRadius, num, domainRadius);
+    const physicsEngine = new PhysicsEngine(mouseAuraRadius, numberOfBalls, domainRadius);
 
     // Crear el círculo y dominio en Paper.js
     const mouseAura = new paper.Path.Circle(paper.view.center, mouseAuraRadius);
     mouseAura.strokeWidth = 0;
     mouseAura.strokeColor = 'black';
 
-    const domain = new paper.Path.Circle(paper.view.center, domainRadius);
+    //Domain
+    const domain = new paper.Path.Rectangle({
+        center: paper.view.center,
+        size: domainRadius * 2
+    });
     domain.strokeWidth = 15;
     domain.strokeColor = 'black';
 
+    //Crea el domain manager
+    const domainEngine = new DomainEngine(domain, physicsEngine);
+
     // Crear las bolas en Paper.js
     const paperBalls = [];
-    for (let i = 0; i < num; i++) {
+    for (let i = 0; i < numberOfBalls; i++) {
         let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), 15);
         paperBall.strokeWidth = 6;
         paperBall.strokeColor = 'black';
@@ -51,49 +58,11 @@ window.onload = function() {
 
     // Función de animación
     paper.view.onFrame = function(event) {
+        domain.rotate(0.01, domain.bounds.center);
         physicsEngine.update(mousePos, event.delta);
-
-        // Actualizar la posición de las bolas en el canvas
-        for (let i = 0; i < num; i++) {
-            if (domain.contains(physicsEngine.getBalls()[i]))
-                {
-                    paperBalls[i].position.x = physicsEngine.getBalls()[i].x;
-                    paperBalls[i].position.y = physicsEngine.getBalls()[i].y;
-                }
-                else
-                {
-                    paperBalls[i].position.x = physicsEngine.getBalls()[i].prev_x;
-                    paperBalls[i].position.y = physicsEngine.getBalls()[i].prev_y;
-                    physicsEngine.getBalls()[i].x=physicsEngine.balls[i].prev_x;
-                    physicsEngine.getBalls()[i].y=physicsEngine.balls[i].prev_y;
-                }
-        }     
-
-        for (let i = 0; i < num; i++) {
-            let dist=paperBalls[i].position.getDistance(domain.getNearestPoint(paperBalls[i].position));
-            if(dist<physicsEngine.getBalls()[i].radius)
-            {
-                physicsEngine.resolveCollision(i,domain.getNearestPoint(paperBalls[i].position));
-            }
-        } 
-
-        for (let i = 0; i < num; i++) {
-            if (domain.contains(physicsEngine.getBalls()[i]))
-                {
-                    paperBalls[i].position.x = physicsEngine.getBalls()[i].x;
-                    paperBalls[i].position.y = physicsEngine.getBalls()[i].y;
-                }
-                else
-                {
-                    paperBalls[i].position.x = physicsEngine.getBalls()[i].prev_x;
-                    paperBalls[i].position.y = physicsEngine.getBalls()[i].prev_y;
-                    physicsEngine.getBalls()[i].x=physicsEngine.balls[i].prev_x;
-                    physicsEngine.getBalls()[i].y=physicsEngine.balls[i].prev_y;
-                }
-        }   
+        domainEngine.handleCollisions(paperBalls);
     };
 };
-
 
 function onWindowResize(canvas, domain, physicsEngine) {
     console.log("resize");

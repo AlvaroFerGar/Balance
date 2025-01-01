@@ -114,8 +114,6 @@ class PhysicsEngine {
             // Ajustar la posición de la pelota
             this.balls[ballIndex].x -= moveX / 2;
             this.balls[ballIndex].y -= moveY / 2;
-
-
     }
 
     avoidOtherBalls() {
