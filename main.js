@@ -10,7 +10,7 @@ window.onload = function() {
 
     // Parámetros de la simulación
     const mouseAuraRadius = 50;
-    const domainRadius = 300;
+    const domainRadius = 200;
     const numberOfBalls = 20;
 
     // Crear el motor de física
@@ -102,7 +102,10 @@ window.onload = function() {
 
     // Función de animación
     paper.view.onFrame = function (event) {
-        //domain.rotate(0.01, domain.bounds.center);
+        console.log(rotationDegree)
+
+        domain.rotate(rotationDegree-oldRotationDegree, domain.bounds.center);
+        oldRotationDegree=rotationDegree;
         physicsEngine.update(mousePos, event.delta);
         domainEngine.handleCollisions(paperBalls);
         ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
@@ -111,6 +114,49 @@ window.onload = function() {
         leftText.position.x = window.innerWidth*percentmargin;
     };
 };
+
+let oldRotationDegree = 0;
+let rotationDegree = 0;
+
+const innerCircle = document.querySelector('.inner-circle');
+const valueDisplay = document.querySelector('.value');
+const container = document.querySelector('.knob-container');
+let isDragging = false;
+
+function updateKnob(e) {
+    if (!isDragging) return;
+    
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+    const degrees = angle * (180 / Math.PI);
+    const radius = rect.width / 2 - 20;
+    
+    const x = Math.cos(angle) * radius + rect.width / 2;
+    const y = Math.sin(angle) * radius + rect.height / 2;
+    
+    innerCircle.style.left = x + 'px';
+    innerCircle.style.top = y + 'px';
+
+    rotationDegree=degrees+90;
+    valueDisplay.textContent = degrees+90;
+}
+
+innerCircle.addEventListener('mousedown', () => {
+    isDragging = true;
+});
+
+document.addEventListener('mousemove', updateKnob);
+document.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
+// Initial position
+innerCircle.style.left = container.offsetWidth / 2 + 'px';
+innerCircle.style.top = '20px';
+
 
 function onWindowResize(canvas, domain, physicsEngine, centerLine, rightText) {
     canvas.width = window.innerWidth;
