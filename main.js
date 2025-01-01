@@ -11,7 +11,7 @@ window.onload = function() {
     // Parámetros de la simulación
     const mouseAuraRadius = 50;
     const domainRadius = 300;
-    const numberOfBalls = 30;
+    const numberOfBalls = 20;
 
     // Crear el motor de física
     const physicsEngine = new PhysicsEngine(mouseAuraRadius, numberOfBalls, domainRadius);
@@ -42,10 +42,51 @@ window.onload = function() {
         paperBalls.push(paperBall);
     }
 
+    const centerX = window.innerWidth / 2;
+
+    // Create center line
+    const centerLine = new paper.Path.Line({
+        from: [centerX, 0],
+        to: [centerX, window.innerHeight],
+        strokeColor: 'gray',
+        strokeWidth: 1
+    });
+
+    let text_size=48;
+    let text_y=text_size;
+    let text_x_leftmargin=text_size;
+    let text_x_rightmargin=text_size;
+
+    // Create counter texts
+    const leftText = new paper.PointText({
+        point: [text_x_leftmargin, text_y],
+        content: '0',
+        fillColor: 'black',
+        fontSize: text_size
+    });
+
+    const rightText = new paper.PointText({
+        point: [window.innerWidth - text_x_rightmargin, text_y],
+        content: '0',
+        fillColor: 'black',
+        fontSize: text_size
+    });
+    centerLine.firstSegment.point = new paper.Point(centerX, 0);
+    centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
+    rightText.position.x = window.innerWidth - text_x_rightmargin;
+
+    const ballCounter = new BallCounter(leftText, rightText);
+
+
     // Manejar el redimensionamiento de la ventana
     window.onresize = function() {
         // Actualizar tamaño del canvas
         onWindowResize(canvas, domain, physicsEngine);
+        // Update centerLine position
+        const centerX = window.innerWidth / 2;
+        centerLine.firstSegment.point = new paper.Point(centerX, 0);
+        centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
+        rightText.position.x = window.innerWidth - text_x_rightmargin;
     };
 
     // Guardar la posición del mouse
@@ -56,15 +97,17 @@ window.onload = function() {
 
     onWindowResize(canvas, domain, physicsEngine);
 
+
     // Función de animación
-    paper.view.onFrame = function(event) {
-        domain.rotate(0.01, domain.bounds.center);
+    paper.view.onFrame = function (event) {
+        //domain.rotate(0.01, domain.bounds.center);
         physicsEngine.update(mousePos, event.delta);
         domainEngine.handleCollisions(paperBalls);
+        ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
     };
 };
 
-function onWindowResize(canvas, domain, physicsEngine) {
+function onWindowResize(canvas, domain, physicsEngine, centerLine, rightText) {
     console.log("resize");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
