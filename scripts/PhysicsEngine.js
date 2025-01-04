@@ -1,5 +1,5 @@
 class PhysicsEngine {
-    constructor(mouseAuraRadius, num, domainRadius) {
+    constructor(mouseAuraRadius, num, domainRadius, ballRadius) {
         this.mouseAuraRadius = mouseAuraRadius;
         this.numOfBalls = num;
         this.domainRadius = domainRadius;
@@ -9,7 +9,7 @@ class PhysicsEngine {
         // Estado de las bolas
         this.balls = [];
         this.mousePos = { x: 0, y: 0 };
-        this.ballRadius = 30;
+        this.ballRadius = ballRadius*2;
 
         // Inicializar las bolas
         this.initializeBalls();
@@ -103,17 +103,17 @@ class PhysicsEngine {
         let dist = Math.sqrt(dx * dx + dy * dy);
         const minDist = (this.balls[ballIndex].radius)+1;  // Distancia mínima deseada entre la pelota y el punto de intersección
 
-            // Calcular el vector de corrección (normalizado)
-            let overlap = minDist - dist;  // Qué tan lejos están de la distancia mínima
-            let scale = overlap / dist;  // Proporción del movimiento necesario
+        // Calcular el vector de corrección (normalizado)
+        let overlap = minDist - dist;  // Qué tan lejos están de la distancia mínima
+        let scale = overlap / dist;  // Proporción del movimiento necesario
 
-            // Mover la pelota para evitar el cruce
-            let moveX = dx * scale;
-            let moveY = dy * scale;
+        // Mover la pelota para evitar el cruce
+        let moveX = dx * scale;
+        let moveY = dy * scale;
 
-            // Ajustar la posición de la pelota
-            this.balls[ballIndex].x -= moveX / 2;
-            this.balls[ballIndex].y -= moveY / 2;
+        // Ajustar la posición de la pelota
+        this.balls[ballIndex].x -= moveX / 2;
+        this.balls[ballIndex].y -= moveY / 2;
     }
 
     avoidOtherBalls() {

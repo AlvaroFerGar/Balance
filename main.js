@@ -12,9 +12,10 @@ window.onload = function() {
     const mouseAuraRadius = 50;
     const domainRadius = 200;
     const numberOfBalls = 20;
+    const ballRadius = 15;
 
     // Crear el motor de física
-    const physicsEngine = new PhysicsEngine(mouseAuraRadius, numberOfBalls, domainRadius);
+    const physicsEngine = new PhysicsEngine(mouseAuraRadius, numberOfBalls, domainRadius, ballRadius);
 
     // Crear el círculo y dominio en Paper.js
     const mouseAura = new paper.Path.Circle(paper.view.center, mouseAuraRadius);
@@ -35,8 +36,8 @@ window.onload = function() {
     // Crear las bolas en Paper.js
     const paperBalls = [];
     for (let i = 0; i < numberOfBalls; i++) {
-        let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), 15);
         paperBall.strokeWidth = 6;
+        let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
         paperBall.strokeColor = 'black';
         paperBall.fillColor = new paper.Color(0.1, 0.1, 0.1);
         paperBalls.push(paperBall);
@@ -103,8 +104,6 @@ window.onload = function() {
 
     function updateKnob() {
         const rect = container.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
         const angle = (rotationDegree - 90) * (Math.PI / 180);
         const radius = rect.width / 2 - 10;
 
