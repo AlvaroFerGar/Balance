@@ -30,14 +30,13 @@ window.onload = function() {
     domain.strokeWidth = 15;
     domain.strokeColor = 'black';
 
-    //Crea el domain manager
-    const domainEngine = new DomainEngine(domain, physicsEngine);
+
 
     // Crear las bolas en Paper.js
     const paperBalls = [];
     for (let i = 0; i < numberOfBalls; i++) {
-        paperBall.strokeWidth = 6;
         let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
+        paperBall.strokeWidth = 6;
         paperBall.strokeColor = 'black';
         paperBall.fillColor = new paper.Color(0.1, 0.1, 0.1);
         paperBalls.push(paperBall);
@@ -145,8 +144,7 @@ window.onload = function() {
     paper.view.onFrame = function (event) {
         domain.rotate(rotationDegree - oldRotationDegree, domain.bounds.center);
         oldRotationDegree = rotationDegree;
-        physicsEngine.update(mousePos, event.delta);
-        domainEngine.handleCollisions(paperBalls);
+        physicsEngine.update(mousePos, event.delta, domain, paperBalls);
         ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
 
         rightText.position.x = window.innerWidth * (1 - percentmargin);

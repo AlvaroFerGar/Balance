@@ -63,8 +63,8 @@ class PhysicsEngine {
     }
 
     // Actualización de la física
-    update(mousePos, delta) {
-   
+    update(mousePos, delta, domain, paperBalls) {
+        let domainEngine = new DomainEngine(domain,this);
         // Actualizar las posiciones de las bolas con física
         let g = 5;
         for (let i = 0; i < this.numOfBalls; i++) {
@@ -81,6 +81,8 @@ class PhysicsEngine {
             // Mantener las bolas dentro del dominio
             //this.keepBallsInDomain();
         }
+
+        domainEngine.handleCollisions(paperBalls);
     }
 
     keepBallsInDomain() {
