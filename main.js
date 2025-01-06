@@ -68,7 +68,7 @@ window.onload = function() {
         let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
         paperBall.strokeWidth = 5;
         paperBall.strokeColor = 'black';
-        paperBall.fillColor = new paper.Color(0, 0, 0);
+        paperBall.fillColor = new paper.Color(1, 0, 0);
         paperBalls.push(paperBall);
     }
 
