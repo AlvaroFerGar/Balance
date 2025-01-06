@@ -21,37 +21,36 @@ window.onload = function() {
 
     // Crear un CompoundPath para el dominio
     let domain = new paper.CompoundPath();
-
-    // Crear el rectángulo base y añadirlo al CompoundPath
-    const domainRect = new paper.Path.Rectangle({
-        center: paper.view.center,
-        size: [domainRadius * 2, domainRadius * 2]
-    });
-    domain.addChild(domainRect);
-
-    // Longitud de las líneas externas
-    const segmentLength = 80;
-
-    // Centros y desplazamientos para las líneas adicionales
-    const centers = [
-        [domainRect.bounds.center.x, domainRect.bounds.topCenter.y, 0, segmentLength], // Línea hacia arriba
-        [domainRect.bounds.center.x, domainRect.bounds.bottomCenter.y, 0, -segmentLength],
-        [domainRect.bounds.leftCenter.x, domainRect.bounds.center.y, segmentLength, 0],
-        [domainRect.bounds.rightCenter.x, domainRect.bounds.center.y, -segmentLength,0]
-    ];
-
-    // Crear y añadir líneas al CompoundPath
-    centers.forEach(([x, y, dx, dy]) => {
-        const line = new paper.Path.Line({
-            from: new paper.Point(x, y),
-            to: new paper.Point(x + dx, y + dy)
+        // Crear el rectángulo base y añadirlo al CompoundPath
+        const domainRect = new paper.Path.Rectangle({
+            center: paper.view.center,
+            size: [domainRadius * 2, domainRadius * 2]
         });
-        domain.addChild(line);
-    });
+        domain.addChild(domainRect);
 
-    // Estilo para el CompoundPath
-    domain.strokeWidth = 18;
-    domain.strokeColor = 'black';
+        // Longitud de las líneas externas
+        const segmentLength = 80;
+
+        // Centros y desplazamientos para las líneas adicionales
+        const centers = [
+            [domainRect.bounds.center.x, domainRect.bounds.topCenter.y, 0, segmentLength], // Línea hacia arriba
+            [domainRect.bounds.center.x, domainRect.bounds.bottomCenter.y, 0, -segmentLength],
+            [domainRect.bounds.leftCenter.x, domainRect.bounds.center.y, segmentLength, 0],
+            [domainRect.bounds.rightCenter.x, domainRect.bounds.center.y, -segmentLength,0]
+        ];
+
+        // Crear y añadir líneas al CompoundPath
+        centers.forEach(([x, y, dx, dy]) => {
+            const line = new paper.Path.Line({
+                from: new paper.Point(x, y),
+                to: new paper.Point(x + dx, y + dy)
+            });
+            domain.addChild(line);
+        });
+
+        // Estilo para el CompoundPath
+        domain.strokeWidth = 18;
+        domain.strokeColor = 'black';
 
 
 
@@ -68,7 +67,7 @@ window.onload = function() {
         let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
         paperBall.strokeWidth = 5;
         paperBall.strokeColor = 'black';
-        paperBall.fillColor = new paper.Color(1, 0, 0);
+        paperBall.fillColor = new paper.Color(0.01, 0.01, 0.01);
         paperBalls.push(paperBall);
     }
 
@@ -131,44 +130,7 @@ window.onload = function() {
 
     let rotationDegree = 0;
 
-    function updateKnob() {
-        const rect = container.getBoundingClientRect();
-        const angle = (rotationDegree - 90) * (Math.PI / 180);
-        const radius = rect.width / 2 - 10;
-
-        const x = Math.cos(angle) * radius + rect.width / 2;
-        const y = Math.sin(angle) * radius + rect.height / 2;
-
-        innerCircle.style.left = x + 'px';
-        innerCircle.style.top = y + 'px';
-        
-        let value=rotationDegree;
-        if (rotationDegree < 0){
-            value = 360 + rotationDegree;
-        }
-        valueDisplay.textContent = value;
-    }
-
-    container.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        rotationDegree += e.deltaY > 0 ? 1 : -1;
-        updateKnob();
-    });
-
-    container.addEventListener('mouseenter', () => {
-        console.log("enter");
-        scrollMsg.style.visibility = 'visible';
-        scrollMsg.style.opacity = '1';
-    });
-    
-    container.addEventListener('mouseleave', () => {
-        console.log("leave");
-        scrollMsg.style.visibility = 'hidden';
-        scrollMsg.style.opacity = '0';
-    });
-
-    // Initial position
-    updateKnob();
+    const rotationKnob = new RotationKnob(document.querySelector('.knob-container'), (value) => {console.log(value); rotationDegree=value});
 
     // Función de animación
     paper.view.onFrame = function (event) {
@@ -183,23 +145,6 @@ window.onload = function() {
 };
 
 let oldRotationDegree = 0;
-
-const innerCircle = document.querySelector('.inner-circle');
-const valueDisplay = document.querySelector('.value');
-const container = document.querySelector('.knob-container');
-const scrollMsg = document.querySelector('.scroll_msg');
-let isDragging = false;
-
-const rect = container.getBoundingClientRect();
-const angle = 0-Math.PI/2;
-const degrees = 0;
-const radius = rect.width / 2-10;
-
-const x = Math.cos(angle) * radius + rect.width / 2;
-const y = Math.sin(angle) * radius + rect.height / 2;
-
-innerCircle.style.left = x + 'px';
-innerCircle.style.top = y + 'px';
 
 function onWindowResize(canvas, domain, physicsEngine, centerLine, rightText) {
     canvas.width = window.innerWidth;

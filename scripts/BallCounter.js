@@ -13,9 +13,9 @@ class BallCounter {
         for (let ball of balls) {
             const distanceFromCenter = ball.x - centerX;
             
-            if (Math.abs(distanceFromCenter) <= ball.radius) {
+            if (Math.abs(distanceFromCenter) <= ball.diameter*0.5) {
                 // Ball intersects center line - calculate proportion
-                const overlap = (ball.radius - Math.abs(distanceFromCenter)) / (2 * ball.radius);
+                const overlap = (ball.diameter*0.5 - Math.abs(distanceFromCenter)) / (ball.diameter*0.5);
                 if (distanceFromCenter < 0) {
                     this.leftCount += (1 - overlap);
                     this.rightCount += overlap;
