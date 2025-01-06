@@ -132,13 +132,20 @@ window.onload = function() {
 
     const rotationKnob = new RotationKnob(document.querySelector('.knob-container'), (value) => {console.log(value); rotationDegree=value});
 
+    let freeze=false;
+
     // Función de animación
     paper.view.onFrame = function (event) {
+       
+        
         domain.rotate(rotationDegree - oldRotationDegree, domain.bounds.center);
         oldRotationDegree = rotationDegree;
-        physicsEngine.update(mousePos,domain, paperBalls);
-        ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
 
+        rotationKnob.freeze=freeze;
+        if(!freeze){
+            physicsEngine.update(mousePos,domain, paperBalls);
+            ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
+        }
         rightText.position.x = window.innerWidth * (1 - percentmargin);
         leftText.position.x = window.innerWidth * percentmargin;
     };
