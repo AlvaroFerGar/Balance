@@ -101,6 +101,23 @@ window.onload = function() {
         fontSize: text_size,
         justification: 'right'
     });
+
+        // Crear el texto con Paper.js
+    const backTextXcorrection=2.7;
+    const backText = new paper.PointText({
+        point: [window.innerWidth / 2-backTextXcorrection, text_y],
+        content: 'back',
+        fillColor: 'black',
+        fontSize: text_size,
+        fontStyle: 'italic',
+        justification: 'center',
+    });
+
+    // Agregar evento de clic al texto
+    backText.onClick = function() {
+        console.log('Back text clicked');
+    };
+
     centerLine.firstSegment.point = new paper.Point(centerX, 0);
     centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
 
@@ -118,6 +135,8 @@ window.onload = function() {
         centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
         //rightText.position.x = window.innerWidth*(1-percentmargin);
         //leftText.position.x = window.innerWidth*percentmargin;
+        backText.point = new paper.Point(window.innerWidth / 2-backTextXcorrection, text_y);
+
     };
 
     // Guardar la posición del mouse
@@ -143,6 +162,7 @@ window.onload = function() {
         oldRotationDegree = rotationDegree;
         freeze = balanceLogic.update(ballCounter, freeze);
         rotationKnob.freeze=freeze;
+        rotationKnob.setBalanceMsg(freeze);
         if(!freeze){
             physicsEngine.update(mousePos,domain, paperBalls);
             ballCounter.update(physicsEngine.balls, window.innerWidth / 2);

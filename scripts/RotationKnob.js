@@ -28,6 +28,16 @@ class RotationKnob {
         this.onChange?.(this.rotation);
     }
 
+    setBalanceMsg(set){
+        if(!set){
+            return;
+        }
+        this.scrollMsg.style.visibility = 'visible';
+        this.scrollMsg.style.opacity = '1';
+        this.scrollMsg.textContent = " balanced";
+        this.scrollMsg.style.color = "black";
+    }
+
     setupEventListeners() {
         this.container.addEventListener('wheel', (e) => {
             e.preventDefault();
