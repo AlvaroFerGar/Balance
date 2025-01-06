@@ -1,24 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Balance</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="assets/images/balance_logo.svg" type="image/png">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 8rem;
+            color: #333;
+            margin-bottom: 50px;
+        }
+
+        #level-select {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            border: 1px solid black;
+            /* Border to see the area */
+            border-radius: 50%;
+            /* Makes it a circle */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #level-select::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            /* Diameter of the inner circle */
+            height: 500px;
+            border-radius: 50%;
+            /* Circular shape */
+            border: 2px dashed black;
+            /* Dashed circle border */
+            pointer-events: none;
+            /* Ensures it doesn't interfere with other elements */
+            display: none;
+            /* Hide the circle */
+        }
+
+        button {
+            position: absolute;
+            font-size: 3rem;
+            padding: 10px 20px;
+            border: 2px solid black;
+            /* Add a solid black border */
+            background-color: black;
+            color: white;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #333;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <h1>Balance</h1>
     <div id="level-select">
-        <button onclick="loadLevel('level1')">Nivel 1</button>
-        <button onclick="loadLevel('level2')">Nivel 2</button>
-        <button onclick="loadLevel('level3')">Nivel 3</button>
+        <button onclick="loadLevel('level1')">1</button>
+        <button onclick="loadLevel('level2')">2</button>
+        <button onclick="loadLevel('level3')">3</button>
     </div>
     <div id="level-info"></div>
     <script>
         function loadLevel(level) {
             window.location.href = `level.html?level=${level}`;
         }
+
+        // Function to calculate positions and animate the buttons
+        function animateButtons() {
+            const buttons = document.querySelectorAll('#level-select button');
+            const radius = 250; // Radius of the circle
+            const centerX = 300; // Center X of the container
+            const centerY = 300; // Center Y of the container
+            const angleStep = 360 / buttons.length; // Angle step between buttons
+            const time = Date.now() / 1000; // Current time (in seconds)
+
+            buttons.forEach((button, index) => {
+                const angle = angleStep * index + time * 1; // Angle for each button, moving over time (45 degrees per second)
+                const radian = (angle * Math.PI) / 180; // Convert angle to radians
+
+                // Calculate the new position of the button
+                const x = centerX + radius * Math.cos(radian) - button.offsetWidth / 2;
+                const y = centerY + radius * Math.sin(radian) - button.offsetHeight / 2;
+
+                // Position the button
+                button.style.left = `${x}px`;
+                button.style.top = `${y}px`;
+            });
+
+            // Request the next frame to continue the animation
+            requestAnimationFrame(animateButtons);
+        }
+
+        // Call the animation function when the page loads
+        window.onload = animateButtons;
     </script>
 </body>
 </html>
