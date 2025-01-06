@@ -30,3 +30,4 @@ function setupDomain(domain,domainRadius) {
     domain.strokeColor = 'black';
 
 }
+function loadLevelName(){return "level3";};

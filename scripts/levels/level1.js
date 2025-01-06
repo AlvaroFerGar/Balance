@@ -7,3 +7,4 @@ function setupDomain(domain, domainRadius) {
     domain.strokeWidth = 10;
     domain.strokeColor = 'blue';
 }
+function loadLevelName(){return "level1";};

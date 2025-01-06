@@ -3,6 +3,9 @@ window.onload = function () {
     // Inicializa el canvas con Paper.js
     paper.setup('myCanvas');
 
+
+    const startTime = Date.now();
+
     // Ajustar el tamaño del canvas al tamaño de la ventana
     const canvas = document.getElementById('myCanvas');
     canvas.width = window.innerWidth;
@@ -19,6 +22,7 @@ window.onload = function () {
     mouseAura.strokeWidth = 0;
     mouseAura.strokeColor = 'black';
 
+    
     // Crear un CompoundPath para el dominio
     let domain = new paper.CompoundPath();
 
@@ -107,24 +111,72 @@ window.onload = function () {
     paper.view.onMouseMove = function (event) {
         mousePos = event.point;
     };
-
-    onWindowResize(canvas, domain, physicsEngine);
+    let freeze = false
+    onWindowResize(canvas, domain, physicsEngine, paperBalls, freeze);
 
     let rotationDegree = 0;
     const rotationKnob = new RotationKnob(document.querySelector('.knob-container'), (value) => { rotationDegree = value; });
 
-    let freeze = false;
+    ;
     const balanceLogic = new BalanceLogic();
+
+
+    // Al cargar el nivel:
+    const savedData = loadLevelData(loadLevelName());
+    if (savedData) {
+        console.log('Datos recuperados:', savedData);
+
+        for (let i = 0; i < numberOfBalls; i++) {
+                console.log(i);
+
+                const x=savedData.ballPositions[i].x;
+                const y=savedData.ballPositions[i].y;
+                
+                paperBalls[i].position.x = x
+                paperBalls[i].position.y = y;
+            }
+        //physicsEngine.loadPositions(savedData.ballPositions);
+        // Si quieres usar estos datos para reiniciar el nivel:
+        freeze = savedData.freeze;
+    }
 
     // Función de animación
     paper.view.onFrame = function (event) {
         domain.rotate(rotationDegree - oldRotationDegree, domain.bounds.center);
         oldRotationDegree = rotationDegree;
+
+
+        const wasFrozen = freeze;
         freeze = balanceLogic.update(ballCounter, freeze);
         rotationKnob.freeze = freeze;
         rotationKnob.setBalanceMsg(freeze);
 
+        if (!wasFrozen && freeze) {
+
+            console.log("oa");
+            const gameData = {
+                freeze: false,
+                ballPositions: [],
+                timeToBalance: null,
+            };
+
+            // El sistema acaba de alcanzar el equilibrio
+            gameData.freeze = true;
+            gameData.timeToBalance = (Date.now() - startTime) / 1000; // Tiempo en segundos
+
+            // Capturar posiciones de las bolas
+            gameData.ballPositions = physicsEngine.getBalls().map(ball => ({
+                x: ball.x,
+                y: ball.y,
+            }));
+
+            saveLevelData(loadLevelName(), gameData);
+            console.log('Datos guardados:', gameData);
+        }
+
+
         if (!freeze) {
+            console.log("eo");
             physicsEngine.update(mousePos, domain, paperBalls);
             ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
         }
@@ -136,7 +188,7 @@ window.onload = function () {
 
 let oldRotationDegree = 0;
 
-function onWindowResize(canvas, domain, physicsEngine) {
+function onWindowResize(canvas, domain, physicsEngine, paperBalls, freeze) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -144,8 +196,28 @@ function onWindowResize(canvas, domain, physicsEngine) {
     paper.view.viewSize = new paper.Size(window.innerWidth, window.innerHeight);
 
     // Actualizar posición del dominio
+    let old_domain_position = domain.position;
     domain.position = paper.view.center;
 
     // Actualizar el centro del dominio en el motor de física
-    physicsEngine.updateDomainCenter();
+    if (!freeze) {
+        physicsEngine.updateDomainCenter();
+    } else {
+        for (let i = 0; i < paperBalls.length; i++) {
+            paperBalls[i].position.x += (old_domain_position.x - domain.position.x);
+            paperBalls[i].position.y += (old_domain_position.y - domain.position.y);
+        }
+    }
 }
+
+function saveLevelData(level, data) {
+    const gameData = JSON.parse(localStorage.getItem('gameData')) || {};
+    gameData[level] = data;
+    localStorage.setItem('gameData', JSON.stringify(gameData));
+}
+
+function loadLevelData(level) {
+    const gameData = JSON.parse(localStorage.getItem('gameData')) || {};
+    return gameData[level] || null;
+}
+

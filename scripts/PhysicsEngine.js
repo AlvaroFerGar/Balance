@@ -31,7 +31,7 @@ class PhysicsEngine {
         // Calcular el desplazamiento
         const deltaX = this.domainCenterX - oldCenterX;
         const deltaY = this.domainCenterY - oldCenterY;
-        console.log(this.numOfBalls);
+
         // Actualizar la posición de todas las bolas
         for (let i = 0; i < this.numOfBalls; i++) {
             this.balls[i].x += deltaX;
@@ -371,4 +371,18 @@ class PhysicsEngine {
     getBalls() {
         return this.balls;
     }
+
+    //loadPositions(positions) {
+    //    for (let i = 0; i < this.numOfBalls; i++) {
+    //        const x=positions[i].x;
+    //        const y=positions[i].y;
+    //        
+    //        this.balls[i].x = x;
+    //        this.balls[i].y = y;
+    //        this.balls[i].prev_x = x;
+    //        this.balls[i].prev_y = y;
+    //        this.paperBalls[i].position.x = x
+    //        this.paperBalls[i].position.y = y;
+    //    }
+    //}
 }
