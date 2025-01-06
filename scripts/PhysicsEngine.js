@@ -90,14 +90,15 @@ class PhysicsEngine {
     verletIntegrate(ball) {
         var temp_x = ball.x;
         var temp_y = ball.y;
-        ball.x += (ball.x - ball.prev_x)*0.01;
-        ball.y += (ball.y - ball.prev_y)*0.01;
+        ball.x += (ball.x - ball.prev_x)*0;//desactivado
+        ball.y += (ball.y - ball.prev_y)*0;//desactivado
         ball.prev_x = temp_x;
         ball.prev_y = temp_y;
     }
 
     // Actualización de la física
     update(mousePos, domain, paperBalls) {
+        //Actualiza el dominio
         this.domain=domain;
         // Actualizar las posiciones de las bolas con física
         let g_max = 5;
@@ -113,14 +114,34 @@ class PhysicsEngine {
                 }
             }
         }
+        //Evita ratón y bolas
         for (let iter = 0; iter < 5; iter++) {
             this.mousePos = mousePos;
             this.avoidMouse();
             this.avoidOtherBalls();
         }
+        //Evita el 
         for (let i = 0; i < paperBalls.length; i++) {
-            this.updateBallPosition(i, paperBalls[i]);
-            this.checkAndResolveCollision(i, paperBalls[i]);
+            let ghostBall = new paper.Path.Circle({
+                center: new paper.Point(this.balls[i].x , this.balls[i].y),
+                radius: this.balls[i].diameter*0.5,
+                fillColor: 'black',
+                opacity: 0.5,
+                strokeWidth: 1,
+                strokeColor: 'black',
+                fillColor: new paper.Color(0.1, 0.1, 0.1,0)
+            });
+            ghostBall.visible = true;
+            // Opcional: hacer que el círculo desaparezca después de un tiempo
+            setTimeout(() => {
+                ghostBall.remove();
+            }, 50);
+//            if (this.domain.contains(this.balls[i])) {
+//                paperBalls[i].position.x = this.balls[i].x;
+//                paperBalls[i].position.y = this.balls[i].y;
+//            }
+            //this.updateBallPosition(i, paperBalls[i]);
+            this.checkAndResolveCollision(i, ghostBall);
             this.updateBallPosition(i, paperBalls[i]);
         }
     }
@@ -128,7 +149,7 @@ class PhysicsEngine {
 
     checkValidBallPosition(ballIndex,x,y, domain) {
 
-        const collision_margin=3;
+        const collision_margin=1;
         this.domain=domain;
         //Chequea el ball estaría dentro del domain
         let ball_posc = new paper.Point(x, y)
@@ -269,26 +290,30 @@ class PhysicsEngine {
 
     updateBallPosition(index, paperBall) {
         // Calculamos la diferencia de posición
-        const dx = this.balls[index].x - paperBall.position.x;
-        const dy = this.balls[index].y - paperBall.position.y;
-        
+        const dx = (this.balls[index].x - this.balls[index].prev_x)*0.5;
+        const dy = (this.balls[index].y - this.balls[index].prev_y)*0.5;
+
         // Calculamos la magnitud del desplazamiento
-        const displacement = Math.sqrt(dx * dx + dy * dy);
-        const MIN_MOVEMENT = 0;//De momento desactivado
-        const min_valid_movement=(Math.abs(dx)>MIN_MOVEMENT||Math.abs(dy)>MIN_MOVEMENT);
-        if (min_valid_movement && this.domain.contains(this.balls[index])) {
-            paperBall.position.x = Math.round(this.balls[index].x);
-            paperBall.position.y = Math.round(this.balls[index].y);
-        } else {
-            this.revertPosition(index, paperBall);
+        const MIN_MOVEMENT = 0.5;//De momento desactivado
+        let min_valid_movement=(Math.abs(dx)>MIN_MOVEMENT||Math.abs(dy)>MIN_MOVEMENT);
+        let new_x=Math.round(this.balls[index].x+this.balls[index].prev_x)*0.5;
+        let new_y=Math.round(this.balls[index].y+this.balls[index].prev_y)*0.5;
+        
+        if (!min_valid_movement){
+            new_x = this.balls[index].prev_x;
+            new_y = this.balls[index].prev_y;
         }
 
-        if(!this.domain.contains(paperBall.position)) {
-            this.balls[index].x = this.domainCenterX;
-            this.balls[index].y = this.domainCenterY;
-            paperBall.position.x =  this.domainCenterX;
-            paperBall.position.y =  this.domainCenterY;
+        //Clausla de reset al centro si una bola se sale del dominio
+        if(!this.domain.contains(new paper.Point(new_x , new_y))) {
+            new_x = this.domainCenterX;
+            new_y = this.domainCenterY;
         }
+
+        this.balls[index].x = new_x;
+        this.balls[index].y = new_y;
+        paperBall.position.x = this.balls[index].x;
+        paperBall.position.y = this.balls[index].y;
     }
 
     revertPosition(index, paperBall) {
@@ -314,7 +339,7 @@ class PhysicsEngine {
             //setTimeout(() => {
             //    collisionMarker.remove();
             //}, 1000);
-            this.resolveCollision(index, this.domain.getNearestPoint(paperBall.position));
+            this.resolveCollision(index, collisionPoint);
         }
     }
 
@@ -330,14 +355,14 @@ class PhysicsEngine {
         let scale = overlap / dist;  // Proporción del movimiento necesario
 
         // Mover la pelota para evitar el cruce
-        let moveX = dx * scale;
-        let moveY = dy * scale;
+        let moveX = dx * scale*2;//Potenciado para evitar clipping en esquina
+        let moveY = dy * scale*2;//Potenciado para evitar clipping en esquina
 
         let new_x=this.balls[ballIndex].x - moveX / 2;     
         let new_y=this.balls[ballIndex].y - moveY / 2;
         //Aquí no se comprueba
-        this.balls[ballIndex].x-=moveX/2;
-        this.balls[ballIndex].y-=moveY/2;
+        this.balls[ballIndex].x=new_x;
+        this.balls[ballIndex].y=new_y;
         //this.updateBallTheoricPosition(ballIndex, new_x, new_y);
     }
 
