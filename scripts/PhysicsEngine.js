@@ -9,7 +9,7 @@ class PhysicsEngine {
         // Estado de las bolas
         this.balls = [];
         this.mousePos = { x: 0, y: 0 };
-        this.ballRadius = ballRadius*2;
+        this.ballDiameter = ballRadius*2;
 
         this.domain=domain;
 
@@ -43,42 +43,43 @@ class PhysicsEngine {
 
     initializeBalls() {
         this.balls = [];
-        const minDistance = this.ballRadius * 3; // Un poco más que el diámetro para dar espacio
+        const minDistance = this.ballDiameter;
         let createdBalls = 0;
         for (let i = 0; i < this.numOfBalls; i++) {
             let validPosition = false;
-            let maxAttempts = 100; // Evita bucle infinito
+            let maxAttempts = 1000; // Evita bucle infinito
             let x_ball, y_ball;
 
             while (!validPosition && maxAttempts > 0) {
                 let angle = Math.random() * 2 * Math.PI;
-                let distance = Math.random() * (this.domainRadius * 0.9);
+                let distance = Math.random() * (this.domainRadius);
                 x_ball = this.domainCenterX + Math.cos(angle) * distance;
                 y_ball = this.domainCenterY + Math.sin(angle) * distance;
+                maxAttempts--;
 
                 // Verifica si la nueva posición está lo suficientemente lejos de las bolas existentes
                 validPosition = true;
-                for (let j = 0; i < createdBalls; j++) {
+                for (let j = 0; j < createdBalls; j++) {
                     let dx = x_ball - this.balls[j].x;
                     let dy = y_ball - this.balls[j].y;
                     let distance = Math.sqrt(dx * dx + dy * dy);
-
+                    
                     if (distance < minDistance) {
                         validPosition = false;
                         break;
                     }
                 }
             }
-            maxAttempts--;
+            
             // Si encontró una posición válida, crea la bola
             if (validPosition) {
                 createdBalls++;
-                let ball = new Ball(x_ball, y_ball, this.ballRadius);
+                let ball = new Ball(x_ball, y_ball, this.ballDiameter);
                 this.balls.push(ball);
             }
             else
             {
-                console.log("No se pudo crear una bola");
+                console.warn("No se pudo crear una bola!!");
             }
         }
 
