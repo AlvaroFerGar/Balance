@@ -14,9 +14,6 @@ window.onload = function() {
     const numberOfBalls = 20;
     const ballRadius = 15;
 
-    // Crear el motor de física
-    const physicsEngine = new PhysicsEngine(mouseAuraRadius, numberOfBalls, domainRadius, ballRadius);
-
     // Crear el círculo y dominio en Paper.js
     const mouseAura = new paper.Path.Circle(paper.view.center, mouseAuraRadius);
     mouseAura.strokeWidth = 0;
@@ -31,10 +28,16 @@ window.onload = function() {
     domain.strokeColor = 'black';
 
 
+    // Crear el motor de física
+    const physicsEngine = new PhysicsEngine(mouseAuraRadius, numberOfBalls, domainRadius, ballRadius, domain);
+
+
+
 
     // Crear las bolas en Paper.js
     const paperBalls = [];
     for (let i = 0; i < numberOfBalls; i++) {
+//        let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
         let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
         paperBall.strokeWidth = 6;
         paperBall.strokeColor = 'black';
@@ -144,7 +147,7 @@ window.onload = function() {
     paper.view.onFrame = function (event) {
         domain.rotate(rotationDegree - oldRotationDegree, domain.bounds.center);
         oldRotationDegree = rotationDegree;
-        physicsEngine.update(mousePos, event.delta, domain, paperBalls);
+        physicsEngine.update(mousePos,domain, paperBalls);
         ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
 
         rightText.position.x = window.innerWidth * (1 - percentmargin);

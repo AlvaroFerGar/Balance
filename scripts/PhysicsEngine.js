@@ -1,5 +1,5 @@
 class PhysicsEngine {
-    constructor(mouseAuraRadius, num, domainRadius, ballRadius) {
+    constructor(mouseAuraRadius, num, domainRadius, ballRadius, domain) {
         this.mouseAuraRadius = mouseAuraRadius;
         this.numOfBalls = num;
         this.domainRadius = domainRadius;
@@ -10,6 +10,8 @@ class PhysicsEngine {
         this.balls = [];
         this.mousePos = { x: 0, y: 0 };
         this.ballRadius = ballRadius*2;
+
+        this.domain=domain;
 
         // Inicializar las bolas
         this.initializeBalls();
@@ -41,15 +43,46 @@ class PhysicsEngine {
 
     initializeBalls() {
         this.balls = [];
+        const minDistance = this.ballRadius * 3; // Un poco más que el diámetro para dar espacio
+        let createdBalls = 0;
         for (let i = 0; i < this.numOfBalls; i++) {
-            let angle = Math.random() * 2 * Math.PI;
-            let distance = Math.random() * (this.domainRadius * 0.9);
-            let x_ball = this.domainCenterX + Math.cos(angle) * distance;
-            let y_ball = this.domainCenterY + Math.sin(angle) * distance;
-            
-            let ball = new Ball(x_ball, y_ball, this.ballRadius);
-            this.balls.push(ball);
+            let validPosition = false;
+            let maxAttempts = 100; // Evita bucle infinito
+            let x_ball, y_ball;
+
+            while (!validPosition && maxAttempts > 0) {
+                let angle = Math.random() * 2 * Math.PI;
+                let distance = Math.random() * (this.domainRadius * 0.9);
+                x_ball = this.domainCenterX + Math.cos(angle) * distance;
+                y_ball = this.domainCenterY + Math.sin(angle) * distance;
+
+                // Verifica si la nueva posición está lo suficientemente lejos de las bolas existentes
+                validPosition = true;
+                for (let j = 0; i < createdBalls; j++) {
+                    let dx = x_ball - this.balls[j].x;
+                    let dy = y_ball - this.balls[j].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < minDistance) {
+                        validPosition = false;
+                        break;
+                    }
+                }
+            }
+            maxAttempts--;
+            // Si encontró una posición válida, crea la bola
+            if (validPosition) {
+                createdBalls++;
+                let ball = new Ball(x_ball, y_ball, this.ballRadius);
+                this.balls.push(ball);
+            }
+            else
+            {
+                console.log("No se pudo crear una bola");
+            }
         }
+
+
     }
 
     // Integración de Verlet
@@ -63,60 +96,67 @@ class PhysicsEngine {
     }
 
     // Actualización de la física
-    update(mousePos, delta, domain, paperBalls) {
-        let domainEngine = new DomainEngine(domain,this);
+    update(mousePos, domain, paperBalls) {
+        this.domain=domain;
         // Actualizar las posiciones de las bolas con física
-        let g = 5;
+        let g_max = 5;
         for (let i = 0; i < this.numOfBalls; i++) {
             this.verletIntegrate(this.balls[i]);
             // Gravedad
-            this.balls[i].y += g;
-        }
-        for (let iter = 0; iter < 5; iter++) {
-            // Separar bolas del mouse
-            this.mousePos = mousePos;
-            this.avoidMouse();
-            // Separar bolas entre sí
-            this.avoidOtherBalls();
-            // Mantener las bolas dentro del dominio
-            //this.keepBallsInDomain();
-        }
-
-        domainEngine.handleCollisions(paperBalls);
-    }
-
-    keepBallsInDomain() {
-        for (let i = 0; i < this.numOfBalls; i++) {
-            let toNext = { x: this.domainCenterX - this.balls[i].x, y: this.domainCenterY - this.balls[i].y };
-            let dist = Math.sqrt(toNext.x ** 2 + toNext.y ** 2);
-
-            if (dist >= this.domainRadius - (this.balls[i].radius)) {
-                let scale = (this.domainRadius - (this.ballRadius)) / dist; // Factor de escala
-                // Normalizamos la dirección (invertimos el vector)
-                this.balls[i].x = this.domainCenterX-toNext.x * scale; // Mover en dirección opuesta
-                this.balls[i].y = this.domainCenterY-toNext.y * scale; // Mover en dirección opuesta
+            for(let g=g_max;g>0;g--)
+            {
+                let new_y=this.balls[i].y + g;
+                if(this.updateBallTheoricPosition(i,this.balls[i].x,new_y))
+                {
+                    break;
+                }
             }
         }
+        for (let iter = 0; iter < 5; iter++) {
+            this.mousePos = mousePos;
+            this.avoidMouse();
+            this.avoidOtherBalls();
+        }
+        for (let i = 0; i < paperBalls.length; i++) {
+            this.updateBallPosition(i, paperBalls[i]);
+            this.checkAndResolveCollision(i, paperBalls[i]);
+            this.updateBallPosition(i, paperBalls[i]);
+        }
     }
 
-    resolveCollision(ballIndex, obstacle) {
-        let dx = obstacle.x - this.balls[ballIndex].x;
-        let dy = obstacle.y - this.balls[ballIndex].y;
-        let dist = Math.sqrt(dx * dx + dy * dy);
-        const minDist = (this.balls[ballIndex].radius)+1;  // Distancia mínima deseada entre la pelota y el punto de intersección
 
-        // Calcular el vector de corrección (normalizado)
-        let overlap = minDist - dist;  // Qué tan lejos están de la distancia mínima
-        let scale = overlap / dist;  // Proporción del movimiento necesario
+    checkValidBallPosition(ballIndex,x,y, domain) {
 
-        // Mover la pelota para evitar el cruce
-        let moveX = dx * scale;
-        let moveY = dy * scale;
+        this.domain=domain;
+        //Chequea el ball estaría dentro del domain
+        let ball_posc = new paper.Point(x, y)
+        if(!domain.contains(ball_posc)) {
+            return false;
+        }
+        let closest_domain_point = this.domain.getNearestPoint(ball_posc);
+        let dist_to_domain = Math.sqrt((ball_posc.x - closest_domain_point.x) ** 2 + (ball_posc.y - closest_domain_point.y) ** 2); 
+        if (dist_to_domain < this.balls[ballIndex].radius) {
+            return false;
+        }
+        //Chequea que no colisione con otras bolas
+        for (let i = 0; i < this.numOfBalls; i++) {
+            if (i === ballIndex) continue;
+            
+            let dx = x - this.balls[i].x;
+            let dy = y - this.balls[i].y;
+            let dist = Math.sqrt(dx * dx + dy * dy);
+            
+            const minDist = Math.max(this.balls[ballIndex].radius, this.balls[i].radius);
+            
+            if (dist < (minDist-1)) {
+                return false;
+            }
+        }
 
-        // Ajustar la posición de la pelota
-        this.balls[ballIndex].x -= moveX / 2;
-        this.balls[ballIndex].y -= moveY / 2;
+        return true;
     }
+
+
 
     avoidOtherBalls() {
         for (let i = 0; i < this.numOfBalls; i++) {
@@ -125,7 +165,7 @@ class PhysicsEngine {
                 let dy = this.balls[j].y - this.balls[i].y;
                 let dist = Math.sqrt(dx * dx + dy * dy);
 
-                const minDist = Math.max(this.balls[i].radius,this.balls[j].radius) + 1;  // Distancia mínima deseada entre las pelotas
+                const minDist = Math.max(this.balls[i].radius,this.balls[j].radius) + 3;  // Distancia mínima deseada entre las pelotas
                 // Si la distancia entre las pelotas es menor que la mínima
                 if (dist < minDist) {
                     // Calcular el vector de corrección (normalizado)
@@ -137,10 +177,13 @@ class PhysicsEngine {
                     let moveY = dy * scale;
     
                     // Ajustar las posiciones de las pelotas
-                    this.balls[i].x -= moveX / 2;
-                    this.balls[i].y -= moveY / 2;
-                    this.balls[j].x += moveX / 2;
-                    this.balls[j].y += moveY / 2;
+                    let new_i_x=this.balls[i].x - moveX / 2;
+                    let new_i_y=this.balls[i].y - moveY / 2;
+                    this.updateBallTheoricPosition(i,new_i_x,new_i_y);
+
+                    let new_j_x=this.balls[j].x + moveX / 2;
+                    let new_j_y=this.balls[j].y + moveY / 2;
+                    this.updateBallTheoricPosition(j,new_j_x,new_j_y);
                 }
             }
         }
@@ -163,10 +206,98 @@ class PhysicsEngine {
                 let moveY = dy * scale;
     
                 // Ajustar la posición de la pelota
-                this.balls[i].x -= moveX / 2;
-                this.balls[i].y -= moveY / 2;
+                let new_x=this.balls[i].x - (moveX*1.2) / 2;
+                let new_y=this.balls[i].y - (moveY*1.2) / 2;
+                this.updateBallTheoricPosition(i,new_x,new_y);
+
             }
         }
+    }
+
+    
+    updateBallTheoricPosition(index, new_x, new_y) {
+        //Si ya estaba mal se aplica el cambio
+        //if(!this.checkValidBallPosition(index, this.balls[index].x, this.balls[index].y, this.domain)) {
+        //    this.balls[index].x = new_x;
+        //    this.balls[index].y = new_y;
+        //    return true;
+        //}
+        //Si el cambio es bueno se aplica
+        if (this.checkValidBallPosition(index, new_x, new_y, this.domain)) {
+            this.balls[index].x = new_x;
+            this.balls[index].y = new_y;
+            return true;
+        }
+        //Si el cambio es bueno en y se aplica
+        if (new_y!=this.balls[index].y && this.checkValidBallPosition(index, this.balls[index].x, new_y, this.domain)) {
+            this.balls[index].y = new_y;
+            return true;
+        }
+        //Si el cambio es bueno en x se aplica
+        if (new_x!=this.balls[index].x && this.checkValidBallPosition(index, new_x, this.balls[index].y, this.domain)) {
+            this.balls[index].x = new_x;
+            return true;
+        }
+        return false;
+    }
+
+    updateBallPosition(index, paperBall) {
+        if (this.domain.contains(this.balls[index])) {
+            paperBall.position.x = this.balls[index].x;
+            paperBall.position.y = this.balls[index].y;
+        } else {
+            this.revertPosition(index, paperBall);
+        }
+    }
+
+    revertPosition(index, paperBall) {
+        paperBall.position.x = this.balls[index].prev_x;
+        paperBall.position.y = this.balls[index].prev_y;
+        this.balls[index].x = this.balls[index].prev_x;
+        this.balls[index].y = this.balls[index].prev_y;
+    }
+
+    checkAndResolveCollision(index, paperBall) {
+        let collisionPoint = this.domain.getNearestPoint(paperBall.position);
+        let dist = paperBall.position.getDistance(collisionPoint);
+        
+        if (dist < this.balls[index].radius) {
+            let collisionMarker = new paper.Path.Circle({
+                center: collisionPoint,
+                radius: 5,
+                fillColor: 'green',
+                opacity: 0.7
+            });
+            
+            // Opcional: hacer que el círculo desaparezca después de un tiempo
+            setTimeout(() => {
+                collisionMarker.remove();
+            }, 1000);
+            this.resolveCollision(index, this.domain.getNearestPoint(paperBall.position));
+        }
+    }
+
+    resolveCollision(ballIndex, obstacle) {
+        console.log("colision "+ballIndex);
+        let dx = obstacle.x - this.balls[ballIndex].x;
+        let dy = obstacle.y - this.balls[ballIndex].y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+        const minDist = (this.balls[ballIndex].radius)+1;  // Distancia mínima deseada entre la pelota y el punto de intersección
+
+        // Calcular el vector de corrección (normalizado)
+        let overlap = minDist - dist;  // Qué tan lejos están de la distancia mínima
+        let scale = overlap / dist;  // Proporción del movimiento necesario
+
+        // Mover la pelota para evitar el cruce
+        let moveX = dx * scale;
+        let moveY = dy * scale;
+
+        let new_x=this.balls[ballIndex].x - moveX / 2;     
+        let new_y=this.balls[ballIndex].y - moveY / 2;
+        //Aquí no se comprueba
+        this.balls[ballIndex].x-=moveX/2;
+        this.balls[ballIndex].y-=moveY/2;
+        //this.updateBallTheoricPosition(ballIndex, new_x, new_y);
     }
 
     getBalls() {
