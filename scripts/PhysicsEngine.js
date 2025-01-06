@@ -101,7 +101,7 @@ class PhysicsEngine {
         //Actualiza el dominio
         this.domain=domain;
         // Actualizar las posiciones de las bolas con física
-        let g_max = 5;
+        let g_max = 9.81;
         for (let i = 0; i < this.numOfBalls; i++) {
             this.verletIntegrate(this.balls[i]);
             // Gravedad
@@ -131,7 +131,7 @@ class PhysicsEngine {
                 strokeColor: 'black',
                 fillColor: new paper.Color(0.1, 0.1, 0.1,0)
             });
-            ghostBall.visible = true;
+            ghostBall.visible = false;
             // Opcional: hacer que el círculo desaparezca después de un tiempo
             setTimeout(() => {
                 ghostBall.remove();
@@ -149,7 +149,9 @@ class PhysicsEngine {
 
     checkValidBallPosition(ballIndex,x,y, domain) {
 
-        const collision_margin=1;
+        const collision_domain_margin=1;
+        const collision_balls_margin=5;
+
         this.domain=domain;
         //Chequea el ball estaría dentro del domain
         let ball_posc = new paper.Point(x, y)
@@ -158,7 +160,7 @@ class PhysicsEngine {
         }
         let closest_domain_point = this.domain.getNearestPoint(ball_posc);
         let dist_to_domain = Math.sqrt((ball_posc.x - closest_domain_point.x) ** 2 + (ball_posc.y - closest_domain_point.y) ** 2); 
-        if (dist_to_domain < (this.balls[ballIndex].diameter-collision_margin)) {
+        if (dist_to_domain < (this.balls[ballIndex].diameter-collision_domain_margin)) {
             return false;
         }
         //Chequea que no colisione con otras bolas
@@ -171,7 +173,7 @@ class PhysicsEngine {
             
             const minDist = Math.max(this.balls[ballIndex].diameter, this.balls[i].diameter);
             
-            if (dist < (minDist-collision_margin)) {
+            if (dist < (minDist-collision_balls_margin)) {
                 return false;
             }
         }
@@ -240,7 +242,7 @@ class PhysicsEngine {
             let dx = this.mousePos.x - this.balls[i].x;
             let dy = this.mousePos.y - this.balls[i].y;
             let dist = Math.sqrt(dx * dx + dy * dy);
-            const minDist = this.mouseAuraRadius + this.balls[i].diameter + 1;  // Distancia mínima deseada entre el ratón y las pelotas    
+            const minDist = this.mouseAuraRadius + this.balls[i].diameter*0.5 + 1;  // Distancia mínima deseada entre el ratón y las pelotas    
             // Si la distancia entre la pelota y el ratón es menor que la mínima
             if (dist < minDist) {
                 // Calcular el vector de corrección (normalizado)

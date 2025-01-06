@@ -9,9 +9,9 @@ window.onload = function() {
     canvas.height = window.innerHeight;
 
     // Parámetros de la simulación
-    const mouseAuraRadius = 50;
+    const mouseAuraRadius = 100;
     const domainRadius = 200;
-    const numberOfBalls = 20;
+    const numberOfBalls = 1;
     const ballRadius = 15;
 
     // Crear el círculo y dominio en Paper.js
@@ -24,7 +24,7 @@ window.onload = function() {
         center: paper.view.center,
         size: domainRadius * 2
     });
-    domain.strokeWidth = 1;
+    domain.strokeWidth = 18;
     domain.strokeColor = 'black';
 
 
@@ -39,9 +39,9 @@ window.onload = function() {
     for (let i = 0; i < numberOfBalls; i++) {
 //        let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
         let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
-        paperBall.strokeWidth = 1;
+        paperBall.strokeWidth = 5;
         paperBall.strokeColor = 'black';
-        paperBall.fillColor = new paper.Color(0.1*i, 0.1, 0.1*i);
+        paperBall.fillColor = new paper.Color(0, 0, 0);
         paperBalls.push(paperBall);
     }
 
