@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance - Nivel</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="myCanvas" width="1000" height="1000"></canvas>
+    <div class="knob-container">
+        <div class="outer-circle"></div>
+        <div class="inner-circle"></div>
+        <div class="scroll_msg">scroll</div>
+        <div class="value">0</div>
+    </div>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.18/paper-full.min.js"></script>
+    <script src="scripts/Ball.js"></script>
+    <script src="scripts/BallCounter.js"></script>
+    <script src="scripts/BalanceLogic.js"></script>
+    <script src="scripts/RotationKnob.js"></script>
+    <script src="scripts/PhysicsEngine.js"></script>
+    <script src="scripts/DomainEngine.js"></script>
+    <script src="main.js"></script>
+    <script>
+        // Leer el nivel desde los parámetros de la URL
+        const params = new URLSearchParams(window.location.search);
+        const level = params.get('level') || 'level1';
+
+        // Cargar el script del nivel
+        const script = document.createElement('script');
+        script.src = `scripts/levels/${level}.js`;
+        document.body.appendChild(script);
+    </script>
+</body>
+</html>

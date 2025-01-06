@@ -1,8 +1,8 @@
-//Based on: https://github.com/zalo/zalo.github.io/blob/master/assets/js/Constraints/VerletCollision.js#L39
-window.onload = function() {
+// Based on: https://github.com/zalo/zalo.github.io/blob/master/assets/js/Constraints/VerletCollision.js#L39
+window.onload = function () {
     // Inicializa el canvas con Paper.js
     paper.setup('myCanvas');
-    
+
     // Ajustar el tamaño del canvas al tamaño de la ventana
     const canvas = document.getElementById('myCanvas');
     canvas.width = window.innerWidth;
@@ -10,61 +10,33 @@ window.onload = function() {
 
     // Parámetros de la simulación
     const mouseAuraRadius = 100;
-    const domainRadius = 200;
     const numberOfBalls = 10;
     const ballRadius = 15;
+    const domainRadius = 200;
 
-    // Crear el círculo y dominio en Paper.js
+    // Crear el círculo del mouse en Paper.js
     const mouseAura = new paper.Path.Circle(paper.view.center, mouseAuraRadius);
     mouseAura.strokeWidth = 0;
     mouseAura.strokeColor = 'black';
 
     // Crear un CompoundPath para el dominio
     let domain = new paper.CompoundPath();
-        // Crear el rectángulo base y añadirlo al CompoundPath
-        const domainRect = new paper.Path.Rectangle({
-            center: paper.view.center,
-            size: [domainRadius * 2, domainRadius * 2]
-        });
-        domain.addChild(domainRect);
 
-        // Longitud de las líneas externas
-        const segmentLength = 80;
-
-        // Centros y desplazamientos para las líneas adicionales
-        const centers = [
-            [domainRect.bounds.center.x, domainRect.bounds.topCenter.y, 0, segmentLength], // Línea hacia arriba
-            [domainRect.bounds.center.x, domainRect.bounds.bottomCenter.y, 0, -segmentLength],
-            [domainRect.bounds.leftCenter.x, domainRect.bounds.center.y, segmentLength, 0],
-            [domainRect.bounds.rightCenter.x, domainRect.bounds.center.y, -segmentLength,0]
-        ];
-
-        // Crear y añadir líneas al CompoundPath
-        centers.forEach(([x, y, dx, dy]) => {
-            const line = new paper.Path.Line({
-                from: new paper.Point(x, y),
-                to: new paper.Point(x + dx, y + dy)
-            });
-            domain.addChild(line);
-        });
-
-        // Estilo para el CompoundPath
-        domain.strokeWidth = 18;
-        domain.strokeColor = 'black';
-
-
+    // Verifica si existe la función `setupDomain` para personalizar el dominio
+    if (typeof setupDomain === 'function') {
+        setupDomain(domain, domainRadius); // Función definida en el script del nivel
+    } else {
+        console.error('No se ha definido la función setupDomain para este nivel.');
+    }
 
     // Crear el motor de física
-    const physicsEngine = new PhysicsEngine(mouseAuraRadius, numberOfBalls, domainRadius, ballRadius, domain);
-
-
-
+    const physicsEngine = new PhysicsEngine(mouseAuraRadius, numberOfBalls, domain.bounds.width / 2, ballRadius, domain);
 
     // Crear las bolas en Paper.js
     const paperBalls = [];
     for (let i = 0; i < numberOfBalls; i++) {
-//        let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
-        let paperBall = new paper.Path.Circle(paper.view.center.add(new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y)), ballRadius);
+        const position = new paper.Point(physicsEngine.getBalls()[i].x, physicsEngine.getBalls()[i].y);
+        let paperBall = new paper.Path.Circle(paper.view.center.add(position), ballRadius);
         paperBall.strokeWidth = 5;
         paperBall.strokeColor = 'black';
         paperBall.fillColor = new paper.Color(0.01, 0.01, 0.01);
@@ -73,7 +45,7 @@ window.onload = function() {
 
     const centerX = window.innerWidth / 2;
 
-    // Create center line
+    // Crear la línea central
     const centerLine = new paper.Path.Line({
         from: [centerX, 0],
         to: [centerX, window.innerHeight],
@@ -81,11 +53,12 @@ window.onload = function() {
         strokeWidth: 1
     });
 
+    // Tamaño y posición del texto
     let text_size = 48;
     let text_y = text_size;
     let percentmargin = 0.1;
 
-    // Create counter texts
+    // Crear textos de contador
     const leftText = new paper.PointText({
         point: [percentmargin * window.innerWidth, text_y],
         content: '0',
@@ -102,10 +75,10 @@ window.onload = function() {
         justification: 'right'
     });
 
-        // Crear el texto con Paper.js
-    const backTextXcorrection=2.7;
+    // Crear texto "back" con funcionalidad
+    const backTextXcorrection = 2.7;
     const backText = new paper.PointText({
-        point: [window.innerWidth / 2-backTextXcorrection, text_y],
+        point: [window.innerWidth / 2 - backTextXcorrection, text_y],
         content: 'back',
         fillColor: 'black',
         fontSize: text_size,
@@ -114,29 +87,19 @@ window.onload = function() {
     });
 
     // Agregar evento de clic al texto
-    backText.onClick = function() {
-        console.log('Back text clicked');
+    backText.onClick = function () {
+        window.location.href = 'index.html'; // Volver a la página principal
     };
-
-    centerLine.firstSegment.point = new paper.Point(centerX, 0);
-    centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
 
     const ballCounter = new BallCounter(leftText, rightText);
 
-
     // Manejar el redimensionamiento de la ventana
-    window.onresize = function() {
-        console.log("resize");
-        // Actualizar tamaño del canvas
-        onWindowResize(canvas, domain, physicsEngine);
-        // Update centerLine position
+    window.onresize = function () {
+        onWindowResize(canvas, domain, physicsEngine, centerLine, rightText);
         const centerX = window.innerWidth / 2;
         centerLine.firstSegment.point = new paper.Point(centerX, 0);
         centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
-        //rightText.position.x = window.innerWidth*(1-percentmargin);
-        //leftText.position.x = window.innerWidth*percentmargin;
-        backText.point = new paper.Point(window.innerWidth / 2-backTextXcorrection, text_y);
-
+        backText.point = new paper.Point(window.innerWidth / 2 - backTextXcorrection, text_y);
     };
 
     // Guardar la posición del mouse
@@ -148,25 +111,24 @@ window.onload = function() {
     onWindowResize(canvas, domain, physicsEngine);
 
     let rotationDegree = 0;
+    const rotationKnob = new RotationKnob(document.querySelector('.knob-container'), (value) => { rotationDegree = value; });
 
-    const rotationKnob = new RotationKnob(document.querySelector('.knob-container'), (value) => {console.log(value); rotationDegree=value});
-
-    let freeze=false;
-
+    let freeze = false;
     const balanceLogic = new BalanceLogic();
+
     // Función de animación
     paper.view.onFrame = function (event) {
-       
-        
         domain.rotate(rotationDegree - oldRotationDegree, domain.bounds.center);
         oldRotationDegree = rotationDegree;
         freeze = balanceLogic.update(ballCounter, freeze);
-        rotationKnob.freeze=freeze;
+        rotationKnob.freeze = freeze;
         rotationKnob.setBalanceMsg(freeze);
-        if(!freeze){
-            physicsEngine.update(mousePos,domain, paperBalls);
+
+        if (!freeze) {
+            physicsEngine.update(mousePos, domain, paperBalls);
             ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
         }
+
         rightText.position.x = window.innerWidth * (1 - percentmargin);
         leftText.position.x = window.innerWidth * percentmargin;
     };
@@ -174,7 +136,7 @@ window.onload = function() {
 
 let oldRotationDegree = 0;
 
-function onWindowResize(canvas, domain, physicsEngine, centerLine, rightText) {
+function onWindowResize(canvas, domain, physicsEngine) {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
