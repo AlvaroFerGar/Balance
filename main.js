@@ -134,13 +134,14 @@ window.onload = function() {
 
     let freeze=false;
 
+    const balanceLogic = new BalanceLogic();
     // Función de animación
     paper.view.onFrame = function (event) {
        
         
         domain.rotate(rotationDegree - oldRotationDegree, domain.bounds.center);
         oldRotationDegree = rotationDegree;
-
+        freeze = balanceLogic.update(ballCounter, freeze);
         rotationKnob.freeze=freeze;
         if(!freeze){
             physicsEngine.update(mousePos,domain, paperBalls);
