@@ -24,36 +24,34 @@
             text-align: center;
             font-size: 8rem;
             color: #333;
+            margin-top: -10px;
             margin-bottom: 50px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
         }
 
         #level-select {
             position: relative;
-            width: 600px;
-            height: 600px;
+            width: 50vw;
+            height: 50vw; 
+            max-width: 600px; 
+            max-height: 600px; 
             border: 1px solid black;
-            /* Border to see the area */
             border-radius: 50%;
-            /* Makes it a circle */
             display: flex;
             justify-content: center;
             align-items: center;
+            aspect-ratio: 1;
         }
 
         #level-select::before {
             content: '';
             position: absolute;
             width: 500px;
-            /* Diameter of the inner circle */
             height: 500px;
             border-radius: 50%;
-            /* Circular shape */
             border: 2px dashed black;
-            /* Dashed circle border */
             pointer-events: none;
-            /* Ensures it doesn't interfere with other elements */
             display: none;
-            /* Hide the circle */
         }
 
         button {
@@ -61,12 +59,13 @@
             font-size: 3rem;
             padding: 10px 20px;
             border: 2px solid black;
-            /* Add a solid black border */
             background-color: black;
             color: white;
             cursor: pointer;
             border-radius: 50%;
             transition: background-color 0.3s ease;
+            aspect-ratio: 1;
+            font-family: Georgia, 'Times New Roman', Times, serif;
         }
 
         button:hover {
@@ -91,21 +90,19 @@
         // Function to calculate positions and animate the buttons
         function animateButtons() {
             const buttons = document.querySelectorAll('#level-select button');
-            const radius = 250; // Radius of the circle
-            const centerX = 300; // Center X of the container
-            const centerY = 300; // Center Y of the container
+            const container = document.querySelector('#level-select');
+            const radius = container.offsetWidth*0.4; // Radius of the circle
+            const centerX = container.offsetWidth / 2; // Center X of the container
+            const centerY = container.offsetHeight / 2; // Center Y of the container
             const angleStep = 360 / buttons.length; // Angle step between buttons
             const time = Date.now() / 1000; // Current time (in seconds)
-
             buttons.forEach((button, index) => {
                 const angle = angleStep * index + time * 1; // Angle for each button, moving over time (45 degrees per second)
                 const radian = (angle * Math.PI) / 180; // Convert angle to radians
 
-                // Calculate the new position of the button
                 const x = centerX + radius * Math.cos(radian) - button.offsetWidth / 2;
                 const y = centerY + radius * Math.sin(radian) - button.offsetHeight / 2;
 
-                // Position the button
                 button.style.left = `${x}px`;
                 button.style.top = `${y}px`;
             });
