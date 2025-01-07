@@ -208,13 +208,12 @@ class PhysicsEngine {
                     //    opacity: 0.5
                     //});
                     //
-                    //// Opcional: hacer que el círculo desaparezca después de un tiempo
+                    /// Opcional: hacer que el círculo desaparezca después de un tiempo
                     //setTimeout(() => {
                     //    collisionMarker.remove();
                     //}, 200);
 
 
-                    console.log(dist);
                     // Ajustar las posiciones de las pelotas
                     let new_i_x=this.balls[i].x - moveX / 2;
                     let new_i_y=this.balls[i].y - moveY / 2;
@@ -346,7 +345,6 @@ class PhysicsEngine {
     }
 
     resolveCollision(ballIndex, obstacle) {
-        console.log("colision "+ballIndex);
         let dx = obstacle.x - this.balls[ballIndex].x;
         let dy = obstacle.y - this.balls[ballIndex].y;
         let dist = Math.sqrt(dx * dx + dy * dy);

@@ -99,7 +99,8 @@ window.onload = function () {
 
     // Manejar el redimensionamiento de la ventana
     window.onresize = function () {
-        onWindowResize(canvas, domain, physicsEngine, centerLine, rightText);
+        onWindowResize(canvas, domain, physicsEngine, paperBalls, freeze);
+
         const centerX = window.innerWidth / 2;
         centerLine.firstSegment.point = new paper.Point(centerX, 0);
         centerLine.lastSegment.point = new paper.Point(centerX, window.innerHeight);
@@ -127,8 +128,6 @@ window.onload = function () {
         console.log('Datos recuperados:', savedData);
 
         for (let i = 0; i < numberOfBalls; i++) {
-                console.log(i);
-
                 const x=savedData.ballPositions[i].x;
                 const y=savedData.ballPositions[i].y;
                 
@@ -153,7 +152,6 @@ window.onload = function () {
 
         if (!wasFrozen && freeze) {
 
-            console.log("oa");
             const gameData = {
                 freeze: false,
                 ballPositions: [],
@@ -176,7 +174,6 @@ window.onload = function () {
 
 
         if (!freeze) {
-            console.log("eo");
             physicsEngine.update(mousePos, domain, paperBalls);
             ballCounter.update(physicsEngine.balls, window.innerWidth / 2);
         }
