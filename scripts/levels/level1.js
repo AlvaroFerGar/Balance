@@ -1,4 +1,4 @@
-// Clase DomainSetup para manejar la configuración detallada
+// Clase MazeConstructor para manejar la configuración detallada
 class MazeConstructor {
 
   static TOP_SEGMENT = 0;
@@ -144,7 +144,7 @@ class MazeConstructor {
     });
     domain.addChild(rect);
     domain.strokeWidth = this.domainStrokeWidth;
-    domain.strokeColor = "blue";
+    domain.strokeColor = "black";
 
     // Crear anillos
     for (let ring = 1; ring <= this.numRings; ring++) {
