@@ -1,121 +1,200 @@
-function setupDomain(domain, domainRadius) {
-    const rect_size = 400;
-    const rect = new paper.Path.Rectangle({
-    center: paper.view.center,
+// Clase DomainSetup para manejar la configuración detallada
+class MazeConstructor {
+
+  static TOP_SEGMENT = 0;
+  static RIGHT_SEGMENT = 1;
+  static BOTTOM_SEGMENT = 2;
+  static LEFT_SEGMENT = 3;
+
+  constructor({
+    centerX,
+    centerY,
+    rectSize = 400,
+    minRingSize = 100,
+    numRings = 2,
+    strokeWidth = 3,
+    domainStrokeWidth = 10
+  }) {
+    this.center = new paper.Point(centerX, centerY);
+    this.rectSize = rectSize;
+    this.minRingSize = minRingSize;
+    this.numRings = numRings;
+    this.strokeWidth = strokeWidth;
+    this.domainStrokeWidth = domainStrokeWidth;
+    this.gaps = [];
+    this.excludedSegments = [];
+  }
+
+  // Añadir un gap específico
+  addGap(ring, segment, position, size) {
+    this.gaps.push({ ring, segment, position, size });
+  }
+
+  // Excluir un segmento completo
+  excludeSegment(ring, segment) {
+    this.excludedSegments.push({ ring, segment });
+  }
+
+  // Calcular el tamaño del anillo basado en su índice
+  calculateRingSize(ringIndex) {
+    return (
+      (this.minRingSize * ringIndex) / this.numRings +
+      (this.rectSize * (this.numRings - ringIndex)) / this.numRings
+    );
+  }
+
+  // Calcular puntos de inicio y fin de un segmento
+  calculateSegmentPoints(size, segment) {
+    let start, end;
     
-    size: [rect_size, rect_size],
-  });
-  domain.addChild(rect);
-  domain.strokeWidth = 10;
-  domain.strokeColor = "blue";
-  console.log("domainradius: "+domainRadius*2);
-  // Crear cuadrados concéntricos
-  const rings = 2; // Número de anillos
-  const min_ring_size=100;
-  for (let i = 0; i <= rings; i++) {
-    const size = (min_ring_size*i/rings+rect_size *(rings - i) / rings); // Tamaño del cuadrado actual
-    console.log("size: "+size);
-    // Crear los cuatro lados del cuadrado con gaps
-    const segments = 4; // Un segmento por lado
+    switch (segment) {
+      case MazeConstructor.TOP_SEGMENT:
+        start = new paper.Point(
+          this.center.x - size / 2,
+          this.center.y - size / 2
+        );
+        end = new paper.Point(
+          this.center.x + size / 2,
+          this.center.y - size / 2
+        );
+        break;
+        
+      case MazeConstructor.RIGHT_SEGMENT: 
+        start = new paper.Point(
+          this.center.x + size / 2,
+          this.center.y - size / 2
+        );
+        end = new paper.Point(
+          this.center.x + size / 2,
+          this.center.y + size / 2
+        );
+        break;
+        
+      case MazeConstructor.BOTTOM_SEGMENT: 
+        start = new paper.Point(
+          this.center.x + size / 2,
+          this.center.y + size / 2
+        );
+        end = new paper.Point(
+          this.center.x - size / 2,
+          this.center.y + size / 2
+        );
+        break;
+        
+      case MazeConstructor.LEFT_SEGMENT:
+        start = new paper.Point(
+          this.center.x - size / 2,
+          this.center.y + size / 2
+        );
+        end = new paper.Point(
+          this.center.x - size / 2,
+          this.center.y - size / 2
+        );
+        break;
+    }
+    
+    return { start, end };
+  }
 
-    for (let seg = 0; seg < segments; seg++) {
+  // Crear un segmento con gap
+  createSegmentWithGap(domain, start, end, gap) {
+    const gapStart = new paper.Point(
+      start.x + (end.x - start.x) * gap.position,
+      start.y + (end.y - start.y) * gap.position
+    );
 
-          // Calcular puntos de inicio y fin según el lado
-          let start, end;
-          console.log("preswitch  seg"+seg+" ring:"+i);
-          switch (seg) {
-            case 0: // Superior
-              start = new paper.Point(
-                paper.view.center.x - size / 2,
-                paper.view.center.y - size / 2
-              );
-              end = new paper.Point(
-                paper.view.center.x - size / 2 + size,
-                paper.view.center.y - size / 2
-              );
-              break; // Añadido break
-              
-            case 1: // Derecho
-              start = new paper.Point(
-                paper.view.center.x + size / 2,
-                paper.view.center.y - size / 2
-              );
-              end = new paper.Point(
-                paper.view.center.x + size / 2,
-                paper.view.center.y - size / 2 + size
-              );
-              break; // Añadido break
-              
-            case 2: // Inferior
-              start = new paper.Point(
-                paper.view.center.x + size / 2,
-                paper.view.center.y + size / 2
-              );
-              end = new paper.Point(
-                paper.view.center.x + size / 2 - size,
-                paper.view.center.y + size / 2
-              );
-              break; // Añadido break
-              
-            case 3: // Izquierdo
-              start = new paper.Point(
-                paper.view.center.x - size / 2,
-                paper.view.center.y + size / 2
-              );
-              end = new paper.Point(
-                paper.view.center.x - size / 2,
-                paper.view.center.y + size / 2 - size
-              );
-              break; // Añadido break
-          }
+    const gapEnd = new paper.Point(
+      start.x + (end.x - start.x) * (gap.position + gap.size),
+      start.y + (end.y - start.y) * (gap.position + gap.size)
+    );
 
-          console.log("postswitch");
-        // Probabilidad 1/5 de crear un gap en el segmento
-        if (Math.random() >3) { // 1/5 de probabilidad
-            console.log("gap");
-            // Posición aleatoria para el gap
-            const gapSize = 0.1; // Tamaño del gap (10% del tamaño del cuadrado)
-            const gapPosition = Math.random()*gapSize; // Entre 0 y 1
+    // Crear primer segmento
+    const path1 = new paper.Path();
+    path1.moveTo(start);
+    path1.lineTo(gapStart);
+    path1.strokeColor = "black";
+    path1.strokeWidth = this.strokeWidth;
+    domain.addChild(path1);
 
-            // Calcular puntos del gap
-            const gapStart = new paper.Point(
-            start.x + (end.x - start.x) * gapPosition,
-            start.y + (end.y - start.y) * gapPosition
-            );
+    // Crear segundo segmento
+    const path2 = new paper.Path();
+    path2.moveTo(gapEnd);
+    path2.lineTo(end);
+    path2.strokeColor = "black";
+    path2.strokeWidth = this.strokeWidth;
+    domain.addChild(path2);
+  }
 
-            let gapPositionEnd=gapPosition+gapSize;
-            const gapEnd = new paper.Point(
-            start.x + (end.x - start.x) * (gapPosition+gapSize),
-            start.y + (end.y - start.y) * (gapPosition+gapSize)
-            );
-            console.log(gapPosition+" "+gapPositionEnd);
-            // Crear dos segmentos separados por el gap
-            const path1 = new paper.Path();
-            path1.moveTo(start);
-            path1.lineTo(gapStart);
-            path1.strokeColor = "black";
-            path1.strokeWidth = 3;
-            domain.addChild(path1);
-            const path2 = new paper.Path();
-            path2.moveTo(gapEnd);
-            path2.lineTo(end);
-            path2.strokeColor = "black";
-            path2.strokeWidth = 3;
-            domain.addChild(path2);
+  // Crear un segmento completo
+  createFullSegment(domain, start, end) {
+    const path = new paper.Path();
+    path.moveTo(start);
+    path.lineTo(end);
+    path.strokeColor = "black";
+    path.strokeWidth = this.strokeWidth;
+    domain.addChild(path);
+  }
 
-        } else {
-            console.log("no-gap");
-            // Si no hay gap, crear el segmento completo
-            const path = new paper.Path();
-            path.moveTo(start);
-            path.lineTo(end);
-            path.strokeColor = "black";
-            path.strokeWidth = 3;
-            domain.addChild(path);
+  // Método principal para configurar el dominio
+  setupDomain(domain) {
+    // Crear rectángulo base
+    const rect = new paper.Path.Rectangle({
+      center: this.center,
+      size: [this.rectSize, this.rectSize],
+    });
+    domain.addChild(rect);
+    domain.strokeWidth = this.domainStrokeWidth;
+    domain.strokeColor = "blue";
+
+    // Crear anillos
+    for (let ring = 1; ring <= this.numRings; ring++) {
+      const size = this.calculateRingSize(ring);
+
+      // Crear los cuatro lados del cuadrado
+      for (let segment = 0; segment < 4; segment++) {
+        // Verificar si el segmento está excluido
+        if (this.excludedSegments.some(s => s.ring === ring && s.segment === segment)) {
+          continue;
         }
 
+        const { start, end } = this.calculateSegmentPoints(size, segment);
+        
+        // Buscar si hay un gap definido para este segmento y anillo
+        const gap = this.gaps.find(g => g.ring === ring && g.segment === segment);
+
+        if (gap) {
+          this.createSegmentWithGap(domain, start, end, gap);
+        } else {
+          this.createFullSegment(domain, start, end);
         }
       }
     }
+  }
+}
 
-function loadLevelName() {  return "level1"; }
+// Función wrapper que mantiene la interfaz original
+function setupDomain(domain, domainRadius) {
+  console.log("domainradius: " + domainRadius * 2);
+  
+  const maze = new MazeConstructor({
+    centerX: paper.view.center.x,
+    centerY: paper.view.center.y,
+    rectSize: 400,
+    minRingSize: 100,
+    numRings: 2
+  });
+
+  // Aquí puedes configurar gaps específicos si lo deseas
+  // Por ejemplo:
+  maze.addGap(1, MazeConstructor.RIGHT_SEGMENT, 0.5, 1/3);  // Añade un gap en el primer anillo, segmento superior
+  maze.addGap(1, MazeConstructor.LEFT_SEGMENT, 0.5, 1/3);  // Añade un gap en el primer anillo, segmento superior
+  maze.addGap(2, MazeConstructor.TOP_SEGMENT, 0.5, 1/2);  // Añade un gap en el primer anillo, segmento superior
+  maze.addGap(2, MazeConstructor.BOTTOM_SEGMENT, 0.5, 1/2);  // Añade un gap en el primer anillo, segmento superior
+
+  //maze.excludeSegment(1, MazeConstructor.BOTTOM_SEGMENT);     // Excluye el segmento derecho del segundo anillo
+  //maze.excludeSegment(2, MazeConstructor.TOP_SEGMENT);
+
+  maze.setupDomain(domain);
+}
+
+function loadLevelName(){return "level1";};
