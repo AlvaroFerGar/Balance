@@ -137,6 +137,8 @@ window.onload = function () {
         //physicsEngine.loadPositions(savedData.ballPositions);
         // Si quieres usar estos datos para reiniciar el nivel:
         freeze = savedData.freeze;
+
+        rotationDegree = savedData.rotationDegree;
     }
 
     // Función de animación
@@ -156,6 +158,7 @@ window.onload = function () {
                 freeze: false,
                 ballPositions: [],
                 timeToBalance: null,
+                rotationDegree: rotationDegree,
             };
 
             // El sistema acaba de alcanzar el equilibrio
@@ -167,6 +170,8 @@ window.onload = function () {
                 x: ball.x,
                 y: ball.y,
             }));
+
+            gameData.rotationDegree = rotationDegree;
 
             saveLevelData(loadLevelName(), gameData);
             console.log('Datos guardados:', gameData);
