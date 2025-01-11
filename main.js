@@ -12,7 +12,7 @@ window.onload = function () {
     canvas.height = window.innerHeight;
 
     // Parámetros de la simulación
-    const mouseAuraRadius = 100;
+    const mouseAuraRadius = 25;
     const numberOfBalls = 10;
     const ballRadius = 15;
     const domainRadius = 200;
@@ -61,6 +61,18 @@ window.onload = function () {
     let text_size = 48;
     let text_y = text_size;
     let percentmargin = 0.1;
+
+    const gameData = {
+        saved: false,
+        freeze: false,
+        ballPositions: [],
+        timeToBalance: null,
+        rotationDegree: 0,
+        windowDimensions: {
+            width: window.innerWidth,
+            height: window.innerHeight
+        }
+    };
 
     // Crear textos de contador
     const leftText = new paper.PointText({
@@ -139,6 +151,9 @@ window.onload = function () {
         freeze = savedData.freeze;
 
         rotationDegree = savedData.rotationDegree;
+
+        onWindowResize(canvas, domain, physicsEngine, paperBalls, freeze);
+
     }
 
     // Función de animación
@@ -154,12 +169,7 @@ window.onload = function () {
 
         if (!wasFrozen && freeze) {
 
-            const gameData = {
-                freeze: false,
-                ballPositions: [],
-                timeToBalance: null,
-                rotationDegree: rotationDegree,
-            };
+            gameData.saved = true;
 
             // El sistema acaba de alcanzar el equilibrio
             gameData.freeze = true;
@@ -172,6 +182,9 @@ window.onload = function () {
             }));
 
             gameData.rotationDegree = rotationDegree;
+            gameData.windowDimensions.height = window.innerHeight;
+            gameData.windowDimensions.width = window.innerWidth;
+
 
             saveLevelData(loadLevelName(), gameData);
             console.log('Datos guardados:', gameData);
@@ -191,6 +204,8 @@ window.onload = function () {
 let oldRotationDegree = 0;
 
 function onWindowResize(canvas, domain, physicsEngine, paperBalls, freeze) {
+    const gameData = loadLevelData(loadLevelName());
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -205,9 +220,14 @@ function onWindowResize(canvas, domain, physicsEngine, paperBalls, freeze) {
     if (!freeze) {
         physicsEngine.updateDomainCenter();
     } else {
+        let centerX = window.innerWidth / 2;
+        let centerY = window.innerHeight / 2;
         for (let i = 0; i < paperBalls.length; i++) {
-            paperBalls[i].position.x += (old_domain_position.x - domain.position.x);
-            paperBalls[i].position.y += (old_domain_position.y - domain.position.y);
+            let old_x_centered =  (gameData.ballPositions[i].x - gameData.windowDimensions.width*0.5)/gameData.windowDimensions.width;
+            let old_y_centered =  (gameData.ballPositions[i].y - gameData.windowDimensions.height*0.5)/gameData.windowDimensions.height;
+
+            paperBalls[i].position.x = (old_x_centered*gameData.windowDimensions.width+centerX);
+            paperBalls[i].position.y = (old_y_centered*gameData.windowDimensions.height+centerY);
         }
     }
 }
