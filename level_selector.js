@@ -1,8 +1,12 @@
 function resetLevels() {
     localStorage.removeItem('gameData');
+    const howToPlayButton = document.getElementById('how-to-play-button');
+    if (howToPlayButton.textContent === 'select level') {
+        return;
+    }
 
     const buttons = document.querySelectorAll('#level-select button');
-    
+
     // Fade out
     buttons.forEach(button => {
         button.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
@@ -22,6 +26,9 @@ function resetLevels() {
 function showHowToPlay() {
     const howToPlayButton = document.getElementById('how-to-play-button');
     const buttons = document.querySelectorAll('#level-select button');
+    const center_text = document.getElementById('center-text');
+
+    center_text.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
 
     if (howToPlayButton.textContent === 'how to play') {
         howToPlayButton.textContent = 'select level';
@@ -30,7 +37,7 @@ function showHowToPlay() {
 
             button.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
             button.classList.add('fade-out');
-
+            center_text.classList.add('fade-in');
         });
     } else {
         howToPlayButton.textContent = 'how to play';
@@ -39,7 +46,7 @@ function showHowToPlay() {
 
             button.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
             button.classList.add('fade-in');
-
+            center_text.classList.add('fade-out');
         });
     }
 }

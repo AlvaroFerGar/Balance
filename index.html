@@ -54,6 +54,23 @@
             display: none;
         }
 
+        #center-text {
+            position: absolute;
+            width: 80%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            color: #333;
+            line-height: 1.5;
+            z-index: 1; /* Para que esté por encima del fondo */
+            pointer-events: none; /* Ignorar clics en este texto */
+            opacity: 0;
+            justify-content: center;
+            text-align: center;
+        }
+
         button {
             position: absolute;
             width: 60px;  
@@ -98,6 +115,16 @@
             animation-fill-mode: forwards;
         }
 
+        #center-text.fade-out {
+            animation: fadeOut 0.25s ease;
+            animation-fill-mode: forwards;
+        }
+
+        #center-text.fade-in {
+            animation: fadeIn 0.25s ease;
+            animation-fill-mode: forwards;
+        }
+
         button:hover {
             background-color: #333;
             color: white;
@@ -134,6 +161,11 @@
 <body>
     <h1>Balance</h1>
     <div id="level-select">
+        <p id="center-text">
+            Mouse to repel the balls.<br>
+            Scroll to rotate the container.<br>
+            Keep balance for 5 seconds.
+        </p>
         <button onclick="loadLevel('level1')">1</button>
         <button onclick="loadLevel('level2')">2</button>
         <button onclick="loadLevel('level3')">3</button>
