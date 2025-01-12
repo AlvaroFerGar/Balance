@@ -1,0 +1,76 @@
+function resetLevels() {
+    localStorage.removeItem('gameData');
+
+    const buttons = document.querySelectorAll('#level-select button');
+    
+    // Fade out
+    buttons.forEach(button => {
+        button.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
+        button.classList.add('fade-out');
+    });
+    
+    // Fade in después de 2 segundos
+    setTimeout(() => {
+        const buttons = document.querySelectorAll('#level-select button');
+        buttons.forEach(button => {
+            button.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
+            button.classList.add('fade-in');
+        });
+    }, 500);
+}
+
+function showHowToPlay() {
+    const howToPlayButton = document.getElementById('how-to-play-button');
+    const buttons = document.querySelectorAll('#level-select button');
+
+    if (howToPlayButton.textContent === 'how to play') {
+        howToPlayButton.textContent = 'select level';
+        buttons.forEach(button => {
+            console.log("none");
+
+            button.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
+            button.classList.add('fade-out');
+
+        });
+    } else {
+        howToPlayButton.textContent = 'how to play';
+        buttons.forEach(button => {
+            console.log("no none");
+
+            button.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
+            button.classList.add('fade-in');
+
+        });
+    }
+}
+
+function loadLevel(level) {
+    window.location.href = `level.html?level=${level}`;
+}
+
+// Function to calculate positions and animate the buttons
+function animateButtons() {
+    const buttons = document.querySelectorAll('#level-select button');
+    const container = document.querySelector('#level-select');
+    const radius = container.offsetWidth * 0.4; // Radius of the circle
+    const centerX = container.offsetWidth / 2; // Center X of the container
+    const centerY = container.offsetHeight / 2; // Center Y of the container
+    const angleStep = 360 / buttons.length; // Angle step between buttons
+    const time = Date.now() / 1000; // Current time (in seconds)
+    buttons.forEach((button, index) => {
+        const angle = angleStep * index + time * 1; // Angle for each button, moving over time (45 degrees per second)
+        const radian = (angle * Math.PI) / 180; // Convert angle to radians
+
+        const x = centerX + radius * Math.cos(radian) - button.offsetWidth / 2;
+        const y = centerY + radius * Math.sin(radian) - button.offsetHeight / 2;
+
+        button.style.left = `${x}px`;
+        button.style.top = `${y}px`;
+    });
+
+    // Request the next frame to continue the animation
+    requestAnimationFrame(animateButtons);
+}
+
+// Call the animation function when the page loads
+window.onload = animateButtons;

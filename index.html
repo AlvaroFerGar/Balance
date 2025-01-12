@@ -73,6 +73,31 @@
             line-height: 1;         /* Ajustar line-height */
         }
 
+        @keyframes fadeOut {
+            0%   { opacity: 1.0; }
+            20%  { opacity: 0.8; }
+            80%  { opacity: 0.2; }
+            100% { opacity: 0.0; }
+        }
+
+        @keyframes fadeIn {
+            0%   { opacity: 0.0; }
+            20%  { opacity: 0.2; }
+            80%  { opacity: 0.8; }
+            100% { opacity: 1.0; }
+
+        }
+
+        button.fade-out {
+            animation: fadeOut 0.25s ease;
+            animation-fill-mode: forwards;
+        }
+
+        button.fade-in {
+            animation: fadeIn 0.25s ease;
+            animation-fill-mode: forwards;
+        }
+
         button:hover {
             background-color: #333;
             color: white;
