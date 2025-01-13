@@ -13,8 +13,11 @@ function resetLevels() {
         button.classList.add('fade-out');
     });
     
+
     // Fade in después de 2 segundos
     setTimeout(() => {
+        console.log("voy a actualizar los buttons")
+        updateButtonLabels();
         const buttons = document.querySelectorAll('#level-select button');
         buttons.forEach(button => {
             button.classList.remove('fade-in', 'fade-out'); // Elimina ambas clases
@@ -80,4 +83,31 @@ function animateButtons() {
 }
 
 // Call the animation function when the page loads
-window.onload = animateButtons;
+window.onload = function() {
+    animateButtons();
+    updateButtonLabels();
+};
+
+function updateButtonLabels() {
+    const buttons = document.querySelectorAll('#level-select button');
+    const gameData = JSON.parse(localStorage.getItem('gameData')) || {};
+
+    buttons.forEach(button => {
+        const level = button.textContent;
+        const levelData = gameData[`level${level}`];
+
+        if (levelData && levelData.freeze) {
+            let time = levelData.timeToBalance;
+            if(time>60)
+            {
+                button.textContent = `+99.9s`;
+            }
+            else
+            {
+                button.textContent = `${time.toFixed(2)}s`;
+            }
+            button.style.fontSize = '18px'; // Cambiar tamaño de la fuente
+            button.style.color = 'lightgreen'; // Cambiar color del texto
+        }
+    });
+}
