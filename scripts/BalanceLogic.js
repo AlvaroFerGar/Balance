@@ -4,7 +4,7 @@ class BalanceLogic {
         this.balanceStartTime = null;
         this.balanceReached = false;
         this.balanceNeededTime = 5;
-        this.effectDuration = 2000; // 2 segundos para el efecto
+        this.effectDuration = 4000;
     }
 
     createOverlay() {
@@ -17,17 +17,17 @@ class BalanceLogic {
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: all 1s ease-in-out;
+            transition: all 1.5s ease-in-out;
             pointer-events: none;
         `;
         
         const text = document.createElement('div');
         text.style.cssText = `
-            font-size: 3rem;
+            font-size: 21rem;
             font-style: italic;
             color: black;
             opacity: 0;
-            transition: opacity 1s;
+            transition: opacity 1.5s;
         `;
         text.textContent = 'Balance';
         
