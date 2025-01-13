@@ -92,22 +92,29 @@ function updateButtonLabels() {
     const buttons = document.querySelectorAll('#level-select button');
     const gameData = JSON.parse(localStorage.getItem('gameData')) || {};
 
-    buttons.forEach(button => {
-        const level = button.textContent;
+    for (let i = 0; i < buttons.length; i++) {
+        const button = buttons[i];
+        const level = i+1;
         const levelData = gameData[`level${level}`];
 
         if (levelData && levelData.freeze) {
             let time = levelData.timeToBalance;
-            if(time>60)
-            {
+            if (time >= 100) {
                 button.textContent = `+99.9s`;
-            }
-            else
-            {
-                button.textContent = `${time.toFixed(2)}s`;
+            } else {
+                if (time < 10) {
+                    button.textContent  = `0${time.toFixed(2)}s`;
+                } else {
+                    button.textContent = `${time.toFixed(2)}s`;
+                }
             }
             button.style.fontSize = '18px'; // Cambiar tamaño de la fuente
             button.style.color = 'lightgreen'; // Cambiar color del texto
+        } else {
+            button.textContent = level; // Volver al texto original
+            button.style.fontSize = ''; // Restablecer tamaño de la fuente
+            button.style.color = ''; // Restablecer color del texto
         }
-    });
+    }
 }
+
