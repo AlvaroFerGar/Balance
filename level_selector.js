@@ -90,8 +90,12 @@ window.onload = function() {
 
 function updateButtonLabels() {
     const buttons = document.querySelectorAll('#level-select button');
+    const game_end_text = document.querySelector('#game-end-text');
     const gameData = JSON.parse(localStorage.getItem('gameData')) || {};
 
+
+    let game_completed = true;
+    let total_time = 0;
     for (let i = 0; i < buttons.length; i++) {
         const button = buttons[i];
         const level = i+1;
@@ -99,6 +103,7 @@ function updateButtonLabels() {
 
         if (levelData && levelData.freeze) {
             let time = levelData.timeToBalance;
+            total_time+=time;
             if (time >= 100) {
                 button.textContent = `+99.9s`;
             } else {
@@ -108,13 +113,23 @@ function updateButtonLabels() {
                     button.textContent = `${time.toFixed(2)}s`;
                 }
             }
-            button.style.fontSize = '18px'; // Cambiar tamaño de la fuente
-            button.style.color = 'lightgreen'; // Cambiar color del texto
+            button.style.fontSize = '18px'; 
+            button.style.color = 'lightgreen';
         } else {
-            button.textContent = level; // Volver al texto original
-            button.style.fontSize = ''; // Restablecer tamaño de la fuente
-            button.style.color = ''; // Restablecer color del texto
+            game_completed = false;
+            button.textContent = level; 
+            button.style.fontSize = '';
+            button.style.color = '';
         }
+    }
+
+    if(game_completed)
+    {
+        game_end_text.textContent = `You have achieved balance in ${total_time.toFixed(2)}s.\nNow you can rest.`;
+    }
+    else
+    {
+        game_end_text.textContent="   ";
     }
 }
 

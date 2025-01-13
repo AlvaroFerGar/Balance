@@ -71,6 +71,20 @@
             text-align: center;
         }
 
+        #game-end-text {
+            /* Modificar el posicionamiento */
+            position: relative; /* Cambiar de absolute a relative */
+            width: 100%;
+            font-size: 1.2rem;
+            font-family: 'Roboto', sans-serif;
+            color: black;
+            line-height: 5;
+            z-index: 1; /* Ajustado a un valor más razonable */
+            pointer-events: none;
+            opacity: 1;
+            text-align: center;
+        }
+
         button {
             position: absolute;
             width: 60px;  
@@ -171,6 +185,7 @@
         <button onclick="loadLevel('level3')">3</button>
     </div>
     <div id="level-info"></div>
+    <div id="game-end-text">   </div>
     <button id="reset-button" class="bottom-button" onclick="resetLevels()">reset levels</button>
     <button id="how-to-play-button" class="bottom-button" onclick="showHowToPlay()">how to play</button>
     <script src="level_selector.js"></script>   
